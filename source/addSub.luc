@@ -1,0 +1,72 @@
+module addSub ( // this module takes care of addition/subtraction/multiplication operations
+    input clk,  // clock
+    input rst,  // reset
+    input a[16],
+    input b[16],
+    input alufn[6],
+    output aluOut[16],
+    output z,
+    output v,
+    output n
+  ) {
+  
+  sig sum[16];
+  
+  .rst(rst){
+    .clk(clk){
+      alu alu;
+    }
+  }
+
+  always {
+  
+    alu.a = a;
+    alu.b = b;
+    aluOut = 16x{0};
+    alu.alufn = alufn;
+    sum = 16x{0};
+    v = 0;
+    n = 0;
+    
+    // v is true when addition overflows. v = (A[16] AND B[16] AND notS[16]) OR (notA[16] AND notB[16] AND S[16])
+    // check alufn[1] and alufn[0]
+    case(alufn[1:0]){
+      // 00 is ADD
+      b00:
+        sum = a+b;
+        v = (a[15] & b[15] & ~sum[15]) | (~a[15] & ~b[15] & sum[15]);
+        
+      // 01 is SUB
+      b01:
+        sum = a-b;
+        v = (a[15] & b[15] & ~sum[15]) | (~a[15] & ~b[15] & sum[15]);
+        
+      // 10 is MULTIPLY
+      b10:
+        sum = a*b;
+        v = (a[15] & b[15] & ~sum[15]) | (~a[15] & ~b[15] & sum[15]);
+      
+      // by default we do addition
+      default:
+        sum = a+b;
+        v = (a[15] & b[15] & ~sum[15]) | (~a[15] & ~b[15] & sum[15]);
+    }
+    
+    aluOut = sum;
+    
+    // calculate values of z, v and n
+    // Z is true when the S outputs are all 0
+    if(sum == 16x{0}){
+      z = 1;
+    }
+    else{
+      z = 0;
+    }
+    
+    // n is true when last bit of S is negative (1)
+    n = sum[15];
+    
+    
+    
+  }
+}

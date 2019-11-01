@@ -1,0 +1,66 @@
+module alu (
+    input clk,  // clock
+    input rst,  // reset
+    input a[16],
+    input b[16],
+    input alufn[6],
+    output aluOut[16],
+    output z,
+    output v,
+    output n
+    
+    
+  ) {
+  .rst(rst){
+    .clk(clk){
+      // modules in the same file that will make up the ALU
+      // should have a addSub.luc file to do addition and subtraction
+      addSub addSub;
+      boolean boolean;
+      shifter shifter;
+      compare compare;
+      // TO DO: complete compare and shifter files
+    }
+  }
+  always {
+    // passing the values of a, b and alufn into these modules
+    addSub.a = a;
+    addSub.b = b;
+    addSub.alufn = alufn;
+    
+    boolean.a = a;
+    boolean.b = b;
+    boolean.alufn = alufn;
+    
+    shifter.a = a;
+    shifter.b = b;
+    shifter.alufn = alufn;
+    
+    compare.a = a;
+    compare.b = b;
+    compare.alufn = alufn;
+    
+    // use 2 MSBs to select which module we will enter to do ALU logic stuff
+    case(alufn[5:4]){
+      // given it starts with 00, we know its either add/sub/mult so we go to module addSub
+      b00:
+        aluOut = addSub.aluOut;
+      
+      // 01 is AND/OR/XOR/"A"(LDR)
+      b01:
+        aluOut = boolean.aluOut;
+        
+      // 10 is all three shift functions
+      b10:
+        aluOut = shifter.aluOut;
+        
+      // 11 is all the compare functions
+      b11:
+        aluOut = compare.aluOut;   
+    }
+    z = addSub.z;
+    v = addSub.v;
+    n = addSub.n
+   
+  }
+}

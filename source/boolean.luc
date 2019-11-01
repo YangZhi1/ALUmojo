@@ -1,0 +1,51 @@
+module boolean (  // this module does operations for AND/OR/XOR/"A" (LDR)
+    input clk,  // clock
+    input rst,  // reset
+    input a[16],
+    input b[16],
+    input alufn[6],
+    output aluOut[16]
+    
+  ) {
+  
+  sig sel[2];
+  var i;
+  
+  .rst(rst){ 
+    .clk(clk){
+      alu alu;
+    }
+  }
+  always {
+    alu.a = a;
+    alu.b = b;
+    alu.alufn = alufn;
+    
+    for(i = 0; i < 16; i++){
+    // have to use a[i] and b[i] as selector signals
+      sel[0] = a[i];
+      sel[1] = b[i];
+    case(sel[1:0]){
+      // 00 selects ALUFN[0] 
+      b00:
+        aluOut[i] = alufn[0];
+        
+      // 01 selects ALUFN[1] 
+      b01:
+        aluOut[i] = alufn[1];
+      
+      // 10 selects ALUFN[2]
+      b10:
+        aluOut[i] = alufn[2];
+        
+      // 11 selects ALUFN[3]
+      b11:
+        aluOut[i] = alufn[3];
+      
+      // by default we select ALUFN[0] as the signal (which is AND)
+      default:
+        aluOut[i] = alufn[0];  
+    }
+  }
+  }
+}
