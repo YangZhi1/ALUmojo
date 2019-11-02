@@ -1,10 +1,29 @@
 module shifter (
     input clk,  // clock
     input rst,  // reset
-    output out
+    input a[16],
+    input b[16],
+    input alufn[6],
+    output aluOut[16],
   ) {
 
+  // don't have other functions to call, this is like a "purely return function"
+  
   always {
-    out = 0;
+    // set default value of aluout first (if not program will "complain")
+    aluOut = a;
+    
+    case(alufn[1:0]){
+      // SHL: shift left
+      b00:
+        aluOut = a << b;
+      // SHR: shift right
+      b01:  
+        aluOut = a >> b;
+      
+      // SRA: shfit right with sign extension
+      b11:
+        aluOut = $signed(a) >>> b
+    }
   }
 }

@@ -14,8 +14,7 @@ module alu (
   .rst(rst){
     .clk(clk){
       // modules in the same file that will make up the ALU
-      // should have a addSub.luc file to do addition and subtraction
-      addSub addSub;
+      adder adder;
       boolean boolean;
       shifter shifter;
       compare compare;
@@ -24,9 +23,9 @@ module alu (
   }
   always {
     // passing the values of a, b and alufn into these modules
-    addSub.a = a;
-    addSub.b = b;
-    addSub.alufn = alufn;
+    adder.a = a;
+    adder.b = b;
+    adder.alufn = alufn;
     
     boolean.a = a;
     boolean.b = b;
@@ -42,9 +41,9 @@ module alu (
     
     // use 2 MSBs to select which module we will enter to do ALU logic stuff
     case(alufn[5:4]){
-      // given it starts with 00, we know its either add/sub/mult so we go to module addSub
+      // given it starts with 00, we know its either add/sub/mult so we go to module adder
       b00:
-        aluOut = addSub.aluOut;
+        aluOut = adder.aluOut;
       
       // 01 is AND/OR/XOR/"A"(LDR)
       b01:
@@ -58,9 +57,9 @@ module alu (
       b11:
         aluOut = compare.aluOut;   
     }
-    z = addSub.z;
-    v = addSub.v;
-    n = addSub.n
+    z = adder.z;
+    v = adder.v;
+    n = adder.n
    
   }
 }

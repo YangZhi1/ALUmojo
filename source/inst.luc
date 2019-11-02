@@ -1,0 +1,15 @@
+global Inst{
+//https://alchitry.com/blogs/tutorials/basic-cpu?_pos=5&_sid=cf6f3d74b&_ss=r
+//referenced from this, could use this to set "states" of ALUFN
+  
+  // group them into their "respective" files
+  // adder file
+  const ADD = 6b000000;
+  const SUB = 6b000001;
+  const MULT = 6b000010;
+  
+  //
+  const AND = 6b011000;
+  const OR = 6b011110;
+  const XOR = 6b010110;
+}

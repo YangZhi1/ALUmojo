@@ -1,4 +1,4 @@
-module addSub ( // this module takes care of addition/subtraction/multiplication operations
+module adder ( // this module takes care of addition/subtraction/multiplication operations
     input clk,  // clock
     input rst,  // reset
     input a[16],
