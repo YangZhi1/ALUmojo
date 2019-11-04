@@ -61,13 +61,12 @@ WARNING:HDLCompiler:1127 - "C:/Users/ymf_m/Documents/mojo/16BitALU/work/planAhea
 WARNING:HDLCompiler:1127 - "C:/Users/ymf_m/Documents/mojo/16BitALU/work/planAhead/16BitALU/16BitALU.srcs/sources_1/imports/verilog/testALU_2.v" Line 55: Assignment to M_alu_z ignored, since the identifier is never used
 WARNING:HDLCompiler:1127 - "C:/Users/ymf_m/Documents/mojo/16BitALU/work/planAhead/16BitALU/16BitALU.srcs/sources_1/imports/verilog/testALU_2.v" Line 56: Assignment to M_alu_v ignored, since the identifier is never used
 WARNING:HDLCompiler:1127 - "C:/Users/ymf_m/Documents/mojo/16BitALU/work/planAhead/16BitALU/16BitALU.srcs/sources_1/imports/verilog/testALU_2.v" Line 57: Assignment to M_alu_n ignored, since the identifier is never used
-WARNING:HDLCompiler:1127 - "C:/Users/ymf_m/Documents/mojo/16BitALU/work/planAhead/16BitALU/16BitALU.srcs/sources_1/imports/verilog/mojo_top_0.v" Line 60: Assignment to M_testALU_sevensegdisp ignored, since the identifier is never used
-WARNING:HDLCompiler:1127 - "C:/Users/ymf_m/Documents/mojo/16BitALU/work/planAhead/16BitALU/16BitALU.srcs/sources_1/imports/verilog/mojo_top_0.v" Line 63: Assignment to a ignored, since the identifier is never used
+WARNING:HDLCompiler:1127 - "C:/Users/ymf_m/Documents/mojo/16BitALU/work/planAhead/16BitALU/16BitALU.srcs/sources_1/imports/verilog/mojo_top_0.v" Line 48: Assignment to M_testALU_sevensegdisp ignored, since the identifier is never used
 --> 
 
-Total memory usage is 4456868 kilobytes
+Total memory usage is 4457956 kilobytes
 
 Number of errors   :    2 (   0 filtered)
-Number of warnings :   16 (   0 filtered)
+Number of warnings :   15 (   0 filtered)
 Number of infos    :    0 (   0 filtered)
 

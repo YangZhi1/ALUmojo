@@ -7,7 +7,10 @@ module alu (
     output aluOut[16],
     output z,
     output v,
-    output n
+    output n,
+    input setz,
+    input setv,
+    input setn
     
     
   ) {
@@ -38,7 +41,10 @@ module alu (
     compare.a = a;
     compare.b = b;
     compare.alufn = alufn;
-    
+    compare.setz = setz; 
+    compare.setv = setv;
+    compare.setn = setn;
+   
     aluOut = 16x{0};
     
     // use 2 MSBs to select which module we will enter to do ALU logic stuff

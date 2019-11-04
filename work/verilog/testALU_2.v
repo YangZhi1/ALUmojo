@@ -109,6 +109,138 @@ module testALU_2 (
           M_state_d = AND_state;
         end
       end
+      AND_state: begin
+        M_alu_a = seta;
+        M_alu_b = setb;
+        M_alu_alufn = 6'h18;
+        sum = M_alu_aluOut;
+        io_led[0+7-:8] = sum[0+7-:8];
+        io_led[8+7-:8] = sum[8+7-:8];
+        sevensegdisp = 28'h833a200;
+        if (io_button[1+0-:1] == 1'h1) begin
+          M_state_d = OR_state;
+        end
+      end
+      OR_state: begin
+        M_alu_a = seta;
+        M_alu_b = setb;
+        M_alu_alufn = 6'h1e;
+        sum = M_alu_aluOut;
+        io_led[0+7-:8] = sum[0+7-:8];
+        io_led[8+7-:8] = sum[8+7-:8];
+        sevensegdisp = 28'h9f48000;
+        if (io_button[1+0-:1] == 1'h1) begin
+          M_state_d = XOR_state;
+        end
+      end
+      XOR_state: begin
+        M_alu_a = seta;
+        M_alu_b = setb;
+        M_alu_alufn = 6'h16;
+        sum = M_alu_aluOut;
+        io_led[0+7-:8] = sum[0+7-:8];
+        io_led[8+7-:8] = sum[8+7-:8];
+        sevensegdisp = 28'hb13e900;
+        if (io_button[1+0-:1] == 1'h1) begin
+          M_state_d = LDR_state;
+        end
+      end
+      LDR_state: begin
+        M_alu_a = seta;
+        M_alu_b = setb;
+        M_alu_alufn = 6'h1a;
+        sum = M_alu_aluOut;
+        io_led[0+7-:8] = sum[0+7-:8];
+        io_led[8+7-:8] = sum[8+7-:8];
+        sevensegdisp = 28'h9912900;
+        if (io_button[1+0-:1] == 1'h1) begin
+          M_state_d = SHL_state;
+        end
+      end
+      SHL_state: begin
+        M_alu_a = seta;
+        M_alu_b = setb;
+        M_alu_alufn = 6'h20;
+        sum = M_alu_aluOut;
+        io_led[0+7-:8] = sum[0+7-:8];
+        io_led[8+7-:8] = sum[8+7-:8];
+        sevensegdisp = 28'ha722600;
+        if (io_button[1+0-:1] == 1'h1) begin
+          M_state_d = SHR_state;
+        end
+      end
+      SHR_state: begin
+        M_alu_a = seta;
+        M_alu_b = setb;
+        M_alu_alufn = 6'h21;
+        sum = M_alu_aluOut;
+        io_led[0+7-:8] = sum[0+7-:8];
+        io_led[8+7-:8] = sum[8+7-:8];
+        sevensegdisp = 28'ha722900;
+        if (io_button[1+0-:1] == 1'h1) begin
+          M_state_d = SRA_state;
+        end
+      end
+      SRA_state: begin
+        M_alu_a = seta;
+        M_alu_b = setb;
+        M_alu_alufn = 6'h23;
+        sum = M_alu_aluOut;
+        io_led[0+7-:8] = sum[0+7-:8];
+        io_led[8+7-:8] = sum[8+7-:8];
+        sevensegdisp = 28'ha74a080;
+        if (io_button[1+0-:1] == 1'h1) begin
+          M_state_d = CMPEQ_state;
+        end
+      end
+      CMPEQ_state: begin
+        M_alu_a = seta;
+        M_alu_b = setb;
+        M_alu_alufn = 6'h33;
+        sum = M_alu_aluOut;
+        io_led[0+7-:8] = sum[0+7-:8];
+        io_led[8+7-:8] = sum[8+7-:8];
+        sevensegdisp = 28'h8716880;
+        if (io_button[1+0-:1] == 1'h1) begin
+          M_state_d = CMPLT_state;
+        end
+      end
+      CMPLT_state: begin
+        M_alu_a = seta;
+        M_alu_b = setb;
+        M_alu_alufn = 6'h35;
+        sum = M_alu_aluOut;
+        io_led[0+7-:8] = sum[0+7-:8];
+        io_led[8+7-:8] = sum[8+7-:8];
+        sevensegdisp = 28'h8732a00;
+        if (io_button[1+0-:1] == 1'h1) begin
+          M_state_d = CMPLE_state;
+        end
+      end
+      CMPLE_state: begin
+        M_alu_a = seta;
+        M_alu_b = setb;
+        M_alu_alufn = 6'h37;
+        sum = M_alu_aluOut;
+        io_led[0+7-:8] = sum[0+7-:8];
+        io_led[8+7-:8] = sum[8+7-:8];
+        sevensegdisp = 28'h8732280;
+        if (io_button[1+0-:1] == 1'h1) begin
+          M_state_d = MULT_state;
+        end
+      end
+      MULT_state: begin
+        M_alu_a = seta;
+        M_alu_b = setb;
+        M_alu_alufn = 6'h02;
+        sum = M_alu_aluOut;
+        io_led[0+7-:8] = sum[0+7-:8];
+        io_led[8+7-:8] = sum[8+7-:8];
+        sevensegdisp = 28'h9b56600;
+        if (io_button[1+0-:1] == 1'h1) begin
+          M_state_d = MULT_state;
+        end
+      end
     endcase
   end
   

@@ -21,24 +21,12 @@ module mojo_top_0 (
     output reg [7:0] io_seg,
     output reg [3:0] io_sel,
     input [4:0] io_button,
-    input [23:0] io_dip,
-    output reg z,
-    output reg v,
-    output reg n,
-    output reg [15:0] aluOut
+    input [23:0] io_dip
   );
   
   
   
   reg rst;
-  
-  reg [15:0] a;
-  
-  reg [15:0] b;
-  
-  reg [15:0] sum;
-  
-  reg [5:0] alufn;
   
   wire [1-1:0] M_reset_cond_out;
   reg [1-1:0] M_reset_cond_in;
@@ -70,13 +58,6 @@ module mojo_top_0 (
     io_led = 24'h000000;
     io_seg = 8'hff;
     io_sel = 4'hf;
-    aluOut = 16'h0000;
-    z = 1'h0;
-    v = 1'h0;
-    n = 1'h0;
-    a = 16'h0000;
-    b = 16'h0000;
-    alufn = 6'h00;
     M_testALU_io_button = io_button;
     M_testALU_io_dip = io_dip;
     io_led = M_testALU_io_led;

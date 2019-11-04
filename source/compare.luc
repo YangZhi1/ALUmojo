@@ -4,7 +4,10 @@ module compare (
     input a[16],
     input b[16],
     input alufn[6],
-    output aluOut[16]
+    output aluOut[16],
+    input setz,
+    input setv,
+    input setn
   ) {
   // need to instantiate adder because we need values of z, v and n from adder
   .rst(rst){
