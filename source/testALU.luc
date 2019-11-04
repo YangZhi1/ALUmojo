@@ -1,0 +1,79 @@
+module testALU (
+    input clk,  // clock
+    input rst,  // reset
+    // take all these stuff from mojo_top.luc
+    input io_button[5],      // use the 5 buttons to change states
+    output io_led [3][8],    // light up io_leds to show output of ALU (sum0-sum15)
+    input io_dip [3][8],
+    output sevensegdisp [4][7]
+
+  ) {
+  
+  sig seta[16];
+  sig setb[16];
+  sig sum[16];
+  
+  .clk(clk){
+    .rst(rst){
+      fsm state = {SETA, SETB, ADD, SUB, AND, OR, XOR, LDR, SHL, SHR, SRA, CMPEQ, CMPLT, CMPLE, MULT};
+      alu alu;  // send values of a, b and alufn to alu to get the values
+    }
+  }
+  always {
+    seta = 16x{0};
+    setb = 16x{0};
+    alu.a = 16x{0};
+    alu.b = 16x{0};
+    alu.alufn = 6x{0};
+    
+    io_led = 3x{{8h00}};    // turn LEDs off
+    
+    sevensegdisp = {"h","i",7h0, 7h0};
+    
+    case (state.q){
+      state.SETA:
+        // let io_dip switches be respective values for A 
+        seta[7:0] = io_dip[0];
+        seta[15:8] = io_dip[1];
+        sevensegdisp = {"S","E","T", "A"};
+        if(io_button[1] == 1){
+          state.d = state.SETB;
+        }
+        
+      state.SETB:
+        // let io_dip switches be respective values for B
+        setb[7:0] = io_dip[0];
+        setb[15:8] = io_dip[1];
+        sevensegdisp = {"S","E","T", "B"};
+        if(io_button[1] == 1){
+          state.d = state.ADD;
+        }
+        
+      state.ADD:
+        alu.a = seta;
+        alu.b = setb;
+        alu.alufn = 6b000000;
+        sum = alu.aluOut;
+        io_led[0] = sum[7:0];
+        io_led[1] = sum[15:8];
+        sevensegdisp = {"A","D","D", 7h0};
+        if(io_button[1] == 1){
+          state.d = state.SUB;
+        }
+        
+      state.SUB:
+        alu.a = seta;
+        alu.b = setb;
+        alu.alufn = 6b000001;
+        sum = alu.aluOut;
+        io_led[0] = sum[7:0];
+        io_led[1] = sum[15:8];
+        sevensegdisp = {"S","U","B", 7h0};
+        if(io_button[1] == 1){
+          state.d = state.AND;
+        }
+        
+      
+    }
+  }
+}
