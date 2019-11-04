@@ -1,40 +1,27 @@
 module compare (
-    input clk,  // clock
-    input rst,  // reset
-    input a[16],
-    input b[16],
     input alufn[6],
     output aluOut[16],
-    input setz,
-    input setv,
-    input setn
+    input z,
+    input v,
+    input n
   ) {
-  // need to instantiate adder because we need values of z, v and n from adder
-  .rst(rst){
-    .clk(clk){
-      adder adder;
-    }
-  }
+
   always {
     // set all aluOut to 0
     aluOut = 16x{0};
-    
-    adder.a = a;
-    adder.b = b;
-    adder.alufn = alufn;
     
     // alufn[2:1] is used to control compare unit
     case(alufn[2:1]){
       // Comparison: A=B, LSB = Z
       b01: 
-        aluOut[0] = adder.z;
+        aluOut[0] = z;
       
       // Compare A < B, LSB = N xor V
       b10:
-        aluOut[0] = adder.n ^ adder.v;
+        aluOut[0] = n ^ v;
         
       b11:
-        aluOut[0] = adder.z | (adder.n ^ adder.v);
+        aluOut[0] = z | (n ^ v);
         
       default:
         aluOut[0] = 0;

@@ -35,31 +35,51 @@ module mojo_top_0 (
     .in(M_reset_cond_in),
     .out(M_reset_cond_out)
   );
-  wire [24-1:0] M_testALU_io_led;
+  wire [8-1:0] M_seg_seg;
+  wire [4-1:0] M_seg_sel;
+  reg [28-1:0] M_seg_values;
+  multi_seven_seg_2 seg (
+    .clk(clk),
+    .rst(rst),
+    .values(M_seg_values),
+    .seg(M_seg_seg),
+    .sel(M_seg_sel)
+  );
+  wire [16-1:0] M_testALU_sum;
   wire [28-1:0] M_testALU_sevensegdisp;
+  wire [1-1:0] M_testALU_setv;
+  wire [1-1:0] M_testALU_setn;
+  wire [1-1:0] M_testALU_setz;
   reg [5-1:0] M_testALU_io_button;
   reg [24-1:0] M_testALU_io_dip;
-  testALU_2 testALU (
+  testALU_3 testALU (
     .clk(clk),
     .rst(rst),
     .io_button(M_testALU_io_button),
     .io_dip(M_testALU_io_dip),
-    .io_led(M_testALU_io_led),
-    .sevensegdisp(M_testALU_sevensegdisp)
+    .sum(M_testALU_sum),
+    .sevensegdisp(M_testALU_sevensegdisp),
+    .setv(M_testALU_setv),
+    .setn(M_testALU_setn),
+    .setz(M_testALU_setz)
   );
   
   always @* begin
     M_reset_cond_in = ~rst_n;
     rst = M_reset_cond_out;
-    led = 8'h00;
+    led = {3'h0, io_button};
     spi_miso = 1'bz;
     spi_channel = 4'bzzzz;
     avr_rx = 1'bz;
     io_led = 24'h000000;
     io_seg = 8'hff;
     io_sel = 4'hf;
+    io_led[0+7-:8] = M_testALU_sum[0+7-:8];
+    io_led[8+7-:8] = M_testALU_sum[8+7-:8];
     M_testALU_io_button = io_button;
     M_testALU_io_dip = io_dip;
-    io_led = M_testALU_io_led;
+    M_seg_values = M_testALU_sevensegdisp;
+    io_seg = ~M_seg_seg;
+    io_sel = ~M_seg_sel;
   end
 endmodule

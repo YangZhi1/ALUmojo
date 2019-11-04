@@ -18,17 +18,23 @@ module alu (
     .clk(clk){
       // modules in the same file that will make up the ALU
       adder adder;
-      boolean boolean;
       shifter shifter;
-      compare compare;
+      
       // TO DO: complete compare and shifter files
     }
   }
+  boolean boolean;
+  compare compare;
   always {
+    z = 0;
+    v = 0;
+    n = 0;
+    
     // passing the values of a, b and alufn into these modules
     adder.a = a;
     adder.b = b;
     adder.alufn = alufn;
+    
     
     boolean.a = a;
     boolean.b = b;
@@ -38,12 +44,10 @@ module alu (
     shifter.b = b;
     shifter.alufn = alufn;
     
-    compare.a = a;
-    compare.b = b;
     compare.alufn = alufn;
-    compare.setz = setz; 
-    compare.setv = setv;
-    compare.setn = setn;
+    compare.z = setz;
+    compare.n = setn;
+    compare.v = setv;
    
     aluOut = 16x{0};
     
@@ -52,6 +56,9 @@ module alu (
       // given it starts with 00, we know its either add/sub/mult so we go to module adder
       b00:
         aluOut = adder.aluOut;
+        z = adder.z;
+        v = adder.v;
+        n = adder.n;
       
       // 01 is AND/OR/XOR/"A"(LDR)
       b01:
@@ -65,9 +72,5 @@ module alu (
       b11:
         aluOut = compare.aluOut;   
     }
-    z = adder.z;
-    v = adder.v;
-    n = adder.n;
-    
   }
 }

@@ -3,9 +3,12 @@ module testALU (
     input rst,  // reset
     // take all these stuff from mojo_top.luc
     input io_button[5],      // use the 5 buttons to change states
-    output io_led [3][8],    // light up io_leds to show output of ALU (sum0-sum15)
+    output sum[16],    // light up io_leds to show output of ALU (sum0-sum15)
     input io_dip [3][8],
-    output sevensegdisp [4][7]
+    output sevensegdisp [4][7],
+    output setv,
+    output setn,
+    output setz
   ) {
 
   
@@ -20,29 +23,40 @@ module testALU (
     }
   }
   
-  const SPEED = 27; // how fast clock ticks, we will use clock[SPEED] to determine how fast, smaller SPEED is the faster the state changes
-
+  const SPEED = 25; // how fast clock ticks, we will use clock[SPEED] to determine how fast, smaller SPEED is the faster the state changes
+  sig wrong[16];    // wrong is used to add to a or b for aluOut to be "wrong"
+  
   always {
     alu.a = 16x{0};
     alu.b = 16x{0};
     alu.alufn = 6x{0};
+    setv = alu.v;
+    setn = alu.n;
+    setz = alu.z;
+    alu.setn = 0;
+    alu.setv = 0;
+    alu.setz = 0;
 
-    io_led = 3x{{8h00}};    // turn LEDs off
-    sevensegdisp = {"h","i",7h0, 7h0};
+    sum = 16x{0};
+    sevensegdisp = {7b0,7b0,7b0, 7b0};
+    wrong = 16x{0}; 
     
-    
+    if(io_button[1] == 1){ // press middle button on io_shield to enter error state
+      wrong = 16x{1};      // set all bits of wrong to 1 to mess up with aluOut
+    }
     
     case (state.q){
     
       state.ADD1:     // Normal case, just A + B
-        alu.a = 16b1; // set A to 0000000000000001
+        alu.a = 16b1 + wrong; // set A to 0000000000000001
         alu.b = 16b1; // set B to 0000000000000001
         alu.alufn = 6b000000;
-        sevensegdisp = {"A","D","D", 7h0};
+        sevensegdisp = {"A","d","d", 7h1};
+        sum = alu.aluOut;  // sum will be read from mojo_top to use to light up respective io_led
         
         clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
         
-        // 1+1 = 10 (lol mAtHs) 
+        // 1+1 = 10 
         // So if SPEED is 27 this is checking 27th bit of clock to see if it has "flipped" to 1
         // If it has flipped to 1 means some seconds has passed and we can move on to next state
 
@@ -57,12 +71,12 @@ module testALU (
         
       
       state.ADD2:                     // Negative case, n is 1 (check n)
-        alu.a = 16b1000000000000000; 
+        alu.a = 16b1000000000000000 + wrong; 
         alu.b = 16b1; 
         alu.alufn = 6b000000;
-        sevensegdisp = {"A","D","D", 7h0};
-        
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
+        sevensegdisp = {"A","d","d", 7h2};
+        sum = alu.aluOut;
+        clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b1000000000000001 && alu.n == 1){
           clock.d = 0;
@@ -75,12 +89,12 @@ module testALU (
         
         
       state.ADD3:                    // check z
-        alu.a = 16b1111111111111111; // A + B will cause an overflow and aluOut will be 000000000...00
+        alu.a = 16b1111111111111111 + wrong; // A + B will cause an overflow and aluOut will be 000000000...00
         alu.b = 16b1; 
         alu.alufn = 6b000000;
-        sevensegdisp = {"A","D","D", 7h0};
-        
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
+        sevensegdisp = {"A" ,"d", "d", 7h3};
+        sum = alu.aluOut;
+        clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b0 && alu.z == 1){
           clock.d = 0;
@@ -93,18 +107,16 @@ module testALU (
         
       
       state.ADD4:                    // check v
-        alu.a = 16b111111111111111; // <- 15 bits of 1, A+B = 16x{1};
+        alu.a = 16b111111111111111 + wrong; // <- 15 bits of 1, A+B = 16x{1};
         alu.b = 16b1; 
         alu.alufn = 6b000000;
-        sevensegdisp = {"A","D","D", 7h0};
-
-Dev Bahl, [04.11.19 16:28]
-
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
+        sevensegdisp = {"A" ,"d", "d", 7h4};
+        sum = alu.aluOut;
+        clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b1000000000000000 && alu.v == 1){
           clock.d = 0;
-          state.d = state.SUB1;
+          state.d = state.AND1;
         }
         
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b1000000000000000 || alu.v != 1){ // anything that is not 10 is a wrong "sum", so its an error
@@ -112,13 +124,13 @@ Dev Bahl, [04.11.19 16:28]
         }
 
       
-      state.SUB1:
-        alu.a = 16b1000000000000000
-        alu.b = 16b1
+      state.SUB1:     // 2-1 = 1
+        alu.a = 16b10 + wrong;
+        alu.b = 16b1;
         alu.alufn = 6b000001;
-        
-        sevensegdisp = {"S","U","B", 7h0};
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
+        sum = alu.aluOut;
+        sevensegdisp = {7b101,"U", "b", 7h1};
+        clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b1){
           clock.d = 0;
@@ -127,62 +139,65 @@ Dev Bahl, [04.11.19 16:28]
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b1){ 
           state.d = state.WRONG;
         }
-      
-      state.SUB2:
-        alu.a = 16b1000000000000001
-        alu.b = 16b1
-        alu.alufn = 6b000001;
-        
-        sevensegdisp = {"S","U","B", 7h0};
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
-        
-        if(clock.q[SPEED] == 1 && alu.aluOut == 16b1000000000000000 && alu.n == 1){
-          clock.d = 0;
-          state.d = state.SUB3;
-        }
-        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b1000000000000000 || alu.n != 1){ 
-          state.d = state.WRONG;
-        }
 
-      state.SUB3:
-        alu.a = 16b1
-        alu.b = 16b1
+      state.SUB2:
+      // 1 - 1 = 0
+        alu.a = 16b1 + wrong;
+        alu.b = 16b1;
         alu.alufn = 6b000001;
-        
-        sevensegdisp = {"S","U","B", 7h0};
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
+        sum = alu.aluOut;
+        sevensegdisp = {7b101,"U", "b", 7h2};
+        clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b0 && alu.z == 1){
           clock.d = 0;
-          state.d = state.SUB4;
+          state.d = state.SUB3;
         }
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b0 || alu.z != 1){ 
           state.d = state.WRONG;
         }
 
-      state.SUB4:
-        alu.a = 16b1000000000000000
-        alu.b = 16b1
+      state.SUB3:
+        // 
+        alu.a = 16b1000000000000000 + wrong;
+        alu.b = 16b1;
         alu.alufn = 6b000001;
-        
-        sevensegdisp = {"S","U","B", 7h0};
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
+        sum = alu.aluOut;
+        sevensegdisp = {7b1001,"U", "b", 7h3};
+        clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b111111111111111 && alu.v == 1){
           clock.d = 0;
-          state.d = state.AND1;
+          state.d = state.SUB4;
         }
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b111111111111111 || alu.v != 1){ 
           state.d = state.WRONG;
         }
 
-      state.AND1:
-        alu.a = 16b1
-        alu.b = 16b1
-        alu.alufn = 6b011000;
+      state.SUB4:  // negative number after subtraction: 10000...000
+        alu.a = 16b1000000000000001 + wrong;
+        alu.b = 16b1;
+        alu.alufn = 6b000001;
+        sum = alu.aluOut;
+        sevensegdisp = {7b1001 ,"U", "b", 7h4};
+        clock.d = clock.q + 1;
         
-        sevensegdisp = {"A","N","D", 7h0};
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
+        if(clock.q[SPEED] == 1 && alu.aluOut == 16b1000000000000000 && alu.n == 1){
+          clock.d = 0;
+          state.d = state.AND1;
+        }
+        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b1000000000000000 || alu.n != 1){ 
+          state.d = state.WRONG;
+        }
+
+      state.AND1:
+      // 1 and 1 in AND will give 1.
+        alu.a = 16b1 + wrong;
+        alu.b = 16b1;
+        alu.alufn = 6b011000;
+        sum = alu.aluOut;
+        sevensegdisp = {"A" ,"n", "d", 7h1};
+        clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b1){
           clock.d = 0;
@@ -193,12 +208,13 @@ Dev Bahl, [04.11.19 16:28]
         }
 
       state.AND2:
-        alu.a = 16b0
-        alu.b = 16b0
+      // 0 and 0 in AND will give 0.
+        alu.a = 16b0 + wrong;
+        alu.b = 16b0;
         alu.alufn = 6b011000;
-        
-        sevensegdisp = {"A","N","D", 7h0};
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
+        sum = alu.aluOut;
+        sevensegdisp = {"A" ,"n", "d", 7h2};
+        clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b0){
           clock.d = 0;
@@ -208,16 +224,15 @@ Dev Bahl, [04.11.19 16:28]
           state.d = state.WRONG;
         }
 
-Dev Bahl, [04.11.19 16:28]
-
 
       state.AND3:
-        alu.a = 16b1
-        alu.b = 16b0
+      // 0 and 1 in AND will give 0.
+        alu.a = 16b0 + wrong;
+        alu.b = 16b1;
         alu.alufn = 6b011000;
-        
-        sevensegdisp = {"A","N","D", 7h0};
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
+        sum = alu.aluOut;
+        sevensegdisp = {"A" ,"n", "d", 7h3};
+        clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b0){
           clock.d = 0;
@@ -228,12 +243,13 @@ Dev Bahl, [04.11.19 16:28]
         }
 
       state.OR1:
-        alu.a = 16b0
-        alu.b = 16b1
+      // 1 and 0 in OR will give 1.
+        alu.a = 16b1 + wrong;
+        alu.b = 16b0;
         alu.alufn = 6b011110;
-        
-        sevensegdisp = {"O","R",7h0, 7h0};
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
+        sum = alu.aluOut;
+        sevensegdisp = {7h0 ,"r", 7h1, "v"};
+        clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b1){
           clock.d = 0;
@@ -244,12 +260,13 @@ Dev Bahl, [04.11.19 16:28]
         }
 
       state.OR2:
-        alu.a = 16b0
-        alu.b = 16b0
+      // 0 and 0 in OR will give 0.
+        alu.a = 16b0 + wrong;
+        alu.b = 16b0;
         alu.alufn = 6b011110;
-        
-        sevensegdisp = {"O","R",7h0, 7h0};
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
+        sum = alu.aluOut;
+        sevensegdisp = {7h0,"r", 7h2, "v"};
+        clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b0){
           clock.d = 0;
@@ -260,12 +277,13 @@ Dev Bahl, [04.11.19 16:28]
         }
 
       state.XOR1:
-        alu.a = 16b0
-        alu.b = 16b1
+      // 1 and 0 in XOR will give 1.
+        alu.a = 16b0 + wrong;
+        alu.b = 16b1;
         alu.alufn = 6b010110;
-        
-        sevensegdisp = {"X","O","R", 7h0};
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
+        sum = alu.aluOut;
+        sevensegdisp = {"x", 7h0 ,"r", 7h1};
+        clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b1){
           clock.d = 0;
@@ -276,12 +294,13 @@ Dev Bahl, [04.11.19 16:28]
         }
 
       state.XOR2:
-        alu.a = 16b1
-        alu.b = 16b1
+      // 1 and 1 in XOR will give 0.
+        alu.a = 16b1 + wrong;
+        alu.b = 16b1;
         alu.alufn = 6b010110;
-        
-        sevensegdisp = {"X","O","R", 7h0};
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
+        sum = alu.aluOut;
+        sevensegdisp = {"x", 7h0 ,"r", 7h2};
+        clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b0){
           clock.d = 0;
@@ -292,127 +311,131 @@ Dev Bahl, [04.11.19 16:28]
         }
 
       state.LDR:
-        alu.a = 16b10
+      // Outout 1 iff A is 1.
+        alu.a = 16b110 + wrong;
         alu.alufn = 6b011010;
-        
-        sevensegdisp = {"L","D","R", 7h0};
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
-        
-        if(clock.q[SPEED] == 1 && alu.aluOut == 16b10){
-          clock.d = 0;
-          state.d = state.SHL1;
-        }
-        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b10){ 
-          state.d = state.WRONG;
-        }
-
-      state.SHL1:
-        alu.a = 16b11
-        alu.b = 16b1
-        alu.alufn = 6b100000;
-        
-        sevensegdisp = {"S","H","L", 7h0};
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
+        sum = alu.aluOut;
+        sevensegdisp = {"L", "d" ,"r", "v"};
+        clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b110){
           clock.d = 0;
-          state.d = state.SHL2;
+          state.d = state.SHL1;
         }
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b110){ 
           state.d = state.WRONG;
         }
 
-      state.SHL2:
-        alu.a = 16b1111111111111111
-        alu.b = 16b1
+      state.SHL1:
+      // Shift Left by 1 bit.
+        alu.a = 16b1111111111111111 + wrong;
+        alu.b = 16b1;
         alu.alufn = 6b100000;
-        
-        sevensegdisp = {"S","H","L", 7h0};
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
+        sum = alu.aluOut;
+        sevensegdisp = {7h5, "h" ,"L", 7h1};
+        clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b1111111111111110){
           clock.d = 0;
-          state.d = state.SHR1;
+          state.d = state.SHL2;
         }
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b1111111111111110){ 
           state.d = state.WRONG;
         }
 
-Dev Bahl, [04.11.19 16:28]
+      state.SHL2:
+      // Shift Left by 1 bit.
+        alu.a = 16b1111 + wrong;
+        alu.b = 16b1;
+        alu.alufn = 6b100000;
+        sum = alu.aluOut;
+        sevensegdisp = {7h5, "h" ,"L", 7h2};
+        clock.d = clock.q + 1;
+        
+        if(clock.q[SPEED] == 1 && alu.aluOut == 16b11110){
+          clock.d = 0;
+          state.d = state.SHR1;
+        }
+        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b11110){ 
+          state.d = state.WRONG;
+        }
 
 
       state.SHR1:
-        alu.a = 16b11
-        alu.b = 16b1
+      // Shift Right by 1 bit.
+        alu.a = 16b111 + wrong;
+        alu.b = 16b1;
         alu.alufn = 6b100001;
+        sum = alu.aluOut;
+        sevensegdisp = {7h5, "h" ,"r", 7h1};
+        clock.d = clock.q + 1;
         
-        sevensegdisp = {"S","H","R", 7h0};
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
-        
-        if(clock.q[SPEED] == 1 && alu.aluOut == 16b1){
+        if(clock.q[SPEED] == 1 && alu.aluOut == 16b11){
           clock.d = 0;
           state.d = state.SHR2;
         }
-        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b1){ 
+        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b11){ 
           state.d = state.WRONG;
         }
       
       state.SHR2:
-        alu.a = 16b1100000000000000
-        alu.b = 16b1
+      // Shift Right by 1 bit.
+        alu.a = 16b1100000000000000 + wrong;
+        alu.b = 16b1;
         alu.alufn = 6b100001;
+        sum = alu.aluOut;
+        sevensegdisp = {7h5, "h" ,"r", 7h2};
+        clock.d = clock.q + 1; 
         
-        sevensegdisp = {"S","H","R", 7h0};
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
-        
-        if(clock.q[SPEED] == 1 && alu.aluOut == 16b1100000000000000){
+        if(clock.q[SPEED] == 1 && alu.aluOut == 16b0110000000000000){
           clock.d = 0;
           state.d = state.SRA1;
         }
-        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b1100000000000000){ 
+        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b0110000000000000){ 
           state.d = state.WRONG;
         }
 
       state.SRA1:
-        alu.a = 16b101
-        alu.b = 16b1
+      // Replace with 0. Shift A right by 1 bit while keeping the sign consistent.
+        alu.a = 16b111 + wrong;
+        alu.b = 16b1;
         alu.alufn = 6b100011;
+        sum = alu.aluOut;
+        sevensegdisp = {7h5, "r" ,"A", 7h1};
+        clock.d = clock.q + 1;
         
-        sevensegdisp = {"S","R","A", 7h0};
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
-        
-        if(clock.q[SPEED] == 1 && alu.aluOut == 16b10){
+        if(clock.q[SPEED] == 1 && alu.aluOut == 16b11){
           clock.d = 0;
           state.d = state.SRA2;
         }
-        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b10){ 
+        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b11){ 
           state.d = state.WRONG;
         }
 
       state.SRA2:
-        alu.a = 16b1010000000000000
-        alu.b = 16b1
+      // Replace with 1. Shift A right by 1 bit while keeping the sign consistent.
+        alu.a = 16b1110000000000000 + wrong;
+        alu.b = 16b1;
         alu.alufn = 6b100011;
-        
-        sevensegdisp = {"S","R","A", 7h0};
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
-        
-        if(clock.q[SPEED] == 1 && alu.aluOut == 16b1101000000000000){
+        sum = alu.aluOut;
+        sevensegdisp = {7h5, "r" ,"A", 7h2}; // 101 = 5, which looks like S (We will get SrA)
+        clock.d = clock.q + 1;
+
+        if(clock.q[SPEED] == 1 && alu.aluOut == 16b1111000000000000){
           clock.d = 0;
           state.d = state.CMPEQ;
         }
-        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b1101000000000000){ 
+        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b1111000000000000){ 
           state.d = state.WRONG;
         }
 
       state.CMPEQ:
-        alu.z = 16b0
-        alu.v = 16b0
-        alu.n = 16b0
+      // Compare Equals to relies on Z. Where LSB = Z.
+        alu.setz = 16b0 + wrong;
         alu.alufn = 6b110011;
-        
-        sevensegdisp = {"C","E","Q", 7h0};
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
+        sum = alu.aluOut;
+        sevensegdisp = {"C","e", 7h9, "v"}; // (Ce9 looks a bit like Ceq)
+        clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b0){
           clock.d = 0;
@@ -423,12 +446,13 @@ Dev Bahl, [04.11.19 16:28]
         }
 
       state.CMPLT:
-        alu.v = 16b1
-        alu.n = 16b0
+      // Compare less than relies on N and V. Where LSB = N XOR V.
+        alu.setv = 16b1 + wrong;
+        alu.setn = 16b0;
         alu.alufn = 6b110101;
-        
-        sevensegdisp = {"C","L","T", 7h0};
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
+        sum = alu.aluOut;
+        sevensegdisp = {"C","L", 7h7, "v"}; // CL7 (looks a bit like CLT)
+        clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b1){
           clock.d = 0;
@@ -439,13 +463,14 @@ Dev Bahl, [04.11.19 16:28]
         }
 
       state.CMPLE:
-        alu.setz = 16b0;
+      // Compare less than equals to relies on Z, V and N. Where LSB = Z OR (N XOR V)
+        alu.setz = 16b0 + wrong;
         alu.setv = 16b1;
         alu.setn = 16b0;
         alu.alufn = 6b110111;
-        
-        sevensegdisp = {"C","L","E", 7h0};
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
+        sum = alu.aluOut;
+        sevensegdisp = {"C","L","E", "v"};
+        clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b1){
           clock.d = 0;
@@ -456,14 +481,15 @@ Dev Bahl, [04.11.19 16:28]
         }
 
       state.MULT1:
-        alu.a = 16b10;
-        alu.b = 16b10;
+      // 8 * 8 = 64
+        alu.a = 16b1000 + wrong;
+        alu.b = 16b1000;
         alu.alufn = 6b000010;
+        sum = alu.aluOut;
+        sevensegdisp = {"m","u","l", 7h1};
+        clock.d = clock.q + 1;
         
-        sevensegdisp = {"M","U","L", 7h0};
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
-        
-        if(clock.q[SPEED] == 1 && alu.aluOut == 16b100){
+        if(clock.q[SPEED] == 1 && alu.aluOut == 16b1000000){
           clock.d = 0;
           state.d = state.MULT2;
         }
@@ -473,12 +499,13 @@ Dev Bahl, [04.11.19 16:28]
 
         
       state.MULT2:
-        alu.a = 16b0;
-        alu.b = 16b10;
+      // 0 * any no. = 0
+        alu.a = 16b0 + wrong;
+        alu.b = 16b1000;
         alu.alufn = 6b000010;
-        
-        sevensegdisp = {"M","U","L", 7h0};
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
+        sum = alu.aluOut;
+        sevensegdisp = {"m","u","l", 7h2};
+        clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b0){
           clock.d = 0;
@@ -489,12 +516,13 @@ Dev Bahl, [04.11.19 16:28]
         }
 
       state.MULT3:
-        alu.a = 16b1111111111111111;
+      // -1 * -1 = 1
+        alu.a = 16b1111111111111111 + wrong; 
         alu.b = 16b1111111111111111;
         alu.alufn = 6b000010;
-        
-        sevensegdisp = {"M","U","L", 7h0};
-        clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
+        sum = alu.aluOut;
+        sevensegdisp = {"m","u","l", 7h3}; // binary 11 = 3
+        clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b1){
           clock.d = 0;
@@ -505,8 +533,15 @@ Dev Bahl, [04.11.19 16:28]
         }
         
       state.FINISH:
-        sevensegdisp = {"E", "N", "D", 7h0};
+        sevensegdisp = {"e","n","d", 7h0}; // leave last digit as empty
         clock.d = clock.q + 1;
+
+      state.WRONG:
+        sevensegdisp = {"e","r","r", 7h0};
+        clock.d = clock.q + 1;
+        
+        // This one is just to blink the leds to show its error
+        sum = 16x{clock.q[23]};
     }
     
   }

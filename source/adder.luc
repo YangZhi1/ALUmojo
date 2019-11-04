@@ -12,18 +12,7 @@ module adder ( // this module takes care of addition/subtraction/multiplication 
   
   sig sum[16];
   
-  .rst(rst){
-    .clk(clk){
-      alu alu;
-    }
-  }
-
   always {
-  
-    alu.a = a;
-    alu.b = b;
-    aluOut = 16x{0};
-    alu.alufn = alufn;
     sum = 16x{0};
     v = 0;
     n = 0;
@@ -47,6 +36,7 @@ module adder ( // this module takes care of addition/subtraction/multiplication 
         v = (a[15] & b[15] & ~sum[15]) | (~a[15] & ~b[15] & sum[15]);
       
       // by default we do addition
+      // meaning for alufn[1:0] = 11 we will do this
       default:
         sum = a+b;
         v = (a[15] & b[15] & ~sum[15]) | (~a[15] & ~b[15] & sum[15]);
@@ -56,7 +46,7 @@ module adder ( // this module takes care of addition/subtraction/multiplication 
     
     // calculate values of z, v and n
     // Z is true when the S outputs are all 0
-    if(sum == 16x{0}){
+    if(sum == 16b0){
       z = 1;
     }
     else{
