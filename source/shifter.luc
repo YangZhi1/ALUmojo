@@ -4,7 +4,7 @@ module shifter (
     input a[16],
     input b[16],
     input alufn[6],
-    output aluOut[16],
+    output aluOut[16]
   ) {
 
   // don't have other functions to call, this is like a "purely return function"
@@ -23,7 +23,7 @@ module shifter (
       
       // SRA: shfit right with sign extension
       b11:
-        aluOut = $signed(a) >>> b
+        aluOut = $signed(a) >>> b;
     }
   }
 }

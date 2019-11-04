@@ -4,27 +4,30 @@
    This is a temporary file and any changes made to it will be destroyed.
 */
 
-module alu_2 (
+module shifter_6 (
     input clk,
     input rst,
-    output reg out,
-    output reg [15:0] aluOut,
-    output reg z,
-    output reg v,
-    output reg n,
     input [15:0] a,
     input [15:0] b,
-    input [5:0] alufn
+    input [5:0] alufn,
+    output reg [15:0] aluOut
   );
   
   
   
-  
   always @* begin
-    out = 1'h0;
-    z = 1'h1;
-    v = 1'h0;
-    n = 1'h1;
-    aluOut = a + b;
+    aluOut = a;
+    
+    case (alufn[0+1-:2])
+      2'h0: begin
+        aluOut = a << b;
+      end
+      2'h1: begin
+        aluOut = a >> b;
+      end
+      2'h3: begin
+        aluOut = $signed(a) >>> b;
+      end
+    endcase
   end
 endmodule

@@ -6,30 +6,28 @@ module testALU (
     output io_led [3][8],    // light up io_leds to show output of ALU (sum0-sum15)
     input io_dip [3][8],
     output sevensegdisp [4][7]
-
   ) {
-  
+
   sig seta[16];
   sig setb[16];
   sig sum[16];
-  
+
   .clk(clk){
     .rst(rst){
       fsm state = {SETA, SETB, ADD, SUB, AND, OR, XOR, LDR, SHL, SHR, SRA, CMPEQ, CMPLT, CMPLE, MULT};
       alu alu;  // send values of a, b and alufn to alu to get the values
     }
   }
+
   always {
     seta = 16x{0};
     setb = 16x{0};
     alu.a = 16x{0};
     alu.b = 16x{0};
     alu.alufn = 6x{0};
-    
+
     io_led = 3x{{8h00}};    // turn LEDs off
-    
     sevensegdisp = {"h","i",7h0, 7h0};
-    
     case (state.q){
       state.SETA:
         // let io_dip switches be respective values for A 
@@ -39,7 +37,7 @@ module testALU (
         if(io_button[1] == 1){
           state.d = state.SETB;
         }
-        
+
       state.SETB:
         // let io_dip switches be respective values for B
         setb[7:0] = io_dip[0];
@@ -48,7 +46,7 @@ module testALU (
         if(io_button[1] == 1){
           state.d = state.ADD;
         }
-        
+
       state.ADD:
         alu.a = seta;
         alu.b = setb;
@@ -60,7 +58,8 @@ module testALU (
         if(io_button[1] == 1){
           state.d = state.SUB;
         }
-        
+
+
       state.SUB:
         alu.a = seta;
         alu.b = setb;
@@ -73,7 +72,139 @@ module testALU (
           state.d = state.AND;
         }
         
-      
+      state.AND:
+        alu.a = seta;
+        alu.b = setb;
+        alu.alufn = 6b011000;
+        sum = alu.aluOut;
+        io_led[0] = sum[7:0];
+        io_led[1] = sum[15:8];
+        sevensegdisp = {"A","N","D", 7h0};
+        if(io_button[1] == 1){
+          state.d = state.OR;
+        }
+        
+      state.OR:
+        alu.a = seta;
+        alu.b = setb;
+        alu.alufn = 6b011110;
+        sum = alu.aluOut;
+        io_led[0] = sum[7:0];
+        io_led[1] = sum[15:8];
+        sevensegdisp = {"O","R",7h0, 7h0};
+        if(io_button[1] == 1){
+          state.d = state.XOR;
+        }
+        
+      state.XOR:
+        alu.a = seta;
+        alu.b = setb;
+        alu.alufn = 6b010110;
+        sum = alu.aluOut;
+        io_led[0] = sum[7:0];
+        io_led[1] = sum[15:8];
+        sevensegdisp = {"X","O","R", 7h0};
+        if(io_button[1] == 1){
+          state.d = state.LDR;
+        }
+        
+      state.LDR:
+        alu.a = seta;
+        alu.b = setb;
+        alu.alufn = 6b011010;
+        sum = alu.aluOut;
+        io_led[0] = sum[7:0];
+        io_led[1] = sum[15:8];
+        sevensegdisp = {"L","D","R", 7h0};
+        if(io_button[1] == 1){
+          state.d = state.SHL;
+        }
+        
+      state.SHL:
+        alu.a = seta;
+        alu.b = setb;
+        alu.alufn = 6b100000;
+        sum = alu.aluOut;
+        io_led[0] = sum[7:0];
+        io_led[1] = sum[15:8];
+        sevensegdisp = {"S","H","L", 7h0};
+        if(io_button[1] == 1){
+          state.d = state.SHR;
+        }
+        
+      state.SHR:
+        alu.a = seta;
+        alu.b = setb;
+        alu.alufn = 6b100001;
+        sum = alu.aluOut;
+        io_led[0] = sum[7:0];
+        io_led[1] = sum[15:8];
+        sevensegdisp = {"S","H","R", 7h0};
+        if(io_button[1] == 1){
+          state.d = state.SRA;
+        }
+        
+      state.SRA:
+        alu.a = seta;
+        alu.b = setb;
+        alu.alufn = 6b100011;
+        sum = alu.aluOut;
+        io_led[0] = sum[7:0];
+        io_led[1] = sum[15:8];
+        sevensegdisp = {"S","R","A", 7h0};
+        if(io_button[1] == 1){
+          state.d = state.CMPEQ;
+        }
+        
+      state.CMPEQ:
+        alu.a = seta;
+        alu.b = setb;
+        alu.alufn = 6b110011;
+        sum = alu.aluOut;
+        io_led[0] = sum[7:0];
+        io_led[1] = sum[15:8];
+        sevensegdisp = {"C","E","Q", 7h0};
+        if(io_button[1] == 1){
+          state.d = state.CMPLT;
+        }
+        
+      state.CMPLT:
+        alu.a = seta;
+        alu.b = setb;
+        alu.alufn = 6b110101;
+        sum = alu.aluOut;
+        io_led[0] = sum[7:0];
+        io_led[1] = sum[15:8];
+        sevensegdisp = {"C","L","T", 7h0};
+        if(io_button[1] == 1){
+          state.d = state.CMPLE;
+        }
+        
+      state.CMPLE:
+        alu.a = seta;
+        alu.b = setb;
+        alu.alufn = 6b110111;
+        sum = alu.aluOut;
+        io_led[0] = sum[7:0];
+        io_led[1] = sum[15:8];
+        sevensegdisp = {"C","L","E", 7h0};
+        if(io_button[1] == 1){
+          state.d = state.MULT;
+        }
+        
+      state.MULT:
+        alu.a = seta;
+        alu.b = setb;
+        alu.alufn = 6b000010;
+        sum = alu.aluOut;
+        io_led[0] = sum[7:0];
+        io_led[1] = sum[15:8];
+        sevensegdisp = {"M","U","L", 7h0};
+        if(io_button[1] == 1){
+          state.d = state.MULT;
+        }
     }
+    
   }
+
 }

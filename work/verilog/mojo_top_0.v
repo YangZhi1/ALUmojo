@@ -36,6 +36,8 @@ module mojo_top_0 (
   
   reg [15:0] b;
   
+  reg [15:0] sum;
+  
   reg [5:0] alufn;
   
   wire [1-1:0] M_reset_cond_out;
@@ -45,36 +47,20 @@ module mojo_top_0 (
     .in(M_reset_cond_in),
     .out(M_reset_cond_out)
   );
-  localparam INPUTA_state = 2'd0;
-  localparam INPUTB_state = 2'd1;
-  localparam INPUTALUFN_state = 2'd2;
-  localparam CALCULATE_state = 2'd3;
-  
-  reg [1:0] M_state_d, M_state_q = INPUTA_state;
-  wire [1-1:0] M_alu_out;
-  wire [16-1:0] M_alu_aluOut;
-  wire [1-1:0] M_alu_z;
-  wire [1-1:0] M_alu_v;
-  wire [1-1:0] M_alu_n;
-  reg [16-1:0] M_alu_a;
-  reg [16-1:0] M_alu_b;
-  reg [6-1:0] M_alu_alufn;
-  alu_2 alu (
+  wire [24-1:0] M_testALU_io_led;
+  wire [28-1:0] M_testALU_sevensegdisp;
+  reg [5-1:0] M_testALU_io_button;
+  reg [24-1:0] M_testALU_io_dip;
+  testALU_2 testALU (
     .clk(clk),
     .rst(rst),
-    .a(M_alu_a),
-    .b(M_alu_b),
-    .alufn(M_alu_alufn),
-    .out(M_alu_out),
-    .aluOut(M_alu_aluOut),
-    .z(M_alu_z),
-    .v(M_alu_v),
-    .n(M_alu_n)
+    .io_button(M_testALU_io_button),
+    .io_dip(M_testALU_io_dip),
+    .io_led(M_testALU_io_led),
+    .sevensegdisp(M_testALU_sevensegdisp)
   );
   
   always @* begin
-    M_state_d = M_state_q;
-    
     M_reset_cond_in = ~rst_n;
     rst = M_reset_cond_out;
     led = 8'h00;
@@ -91,62 +77,8 @@ module mojo_top_0 (
     a = 16'h0000;
     b = 16'h0000;
     alufn = 6'h00;
-    M_alu_a = a;
-    M_alu_b = b;
-    M_alu_alufn = alufn;
-    
-    case (M_state_q)
-      INPUTA_state: begin
-        io_led[16+0+0-:1] = 1'h1;
-        io_led[16+1+0-:1] = 1'h0;
-        io_led[16+2+0-:1] = 1'h0;
-        if (io_button[1+0-:1] == 1'h1) begin
-          a[0+7-:8] = io_dip[0+0+7-:8];
-          a[8+7-:8] = io_dip[8+0+7-:8];
-          io_led = io_dip;
-          M_state_d = INPUTB_state;
-        end
-      end
-      INPUTB_state: begin
-        io_led[16+0+0-:1] = 1'h0;
-        io_led[16+1+0-:1] = 1'h1;
-        io_led[16+2+0-:1] = 1'h0;
-        if (io_button[1+0-:1] == 1'h1) begin
-          b[0+7-:8] = io_dip[0+0+7-:8];
-          b[8+7-:8] = io_dip[8+0+7-:8];
-          io_led = io_dip;
-          M_state_d = INPUTALUFN_state;
-        end
-      end
-      INPUTALUFN_state: begin
-        io_led[16+0+0-:1] = 1'h0;
-        io_led[16+1+0-:1] = 1'h0;
-        io_led[16+2+0-:1] = 1'h1;
-        if (io_button[1+0-:1] == 1'h1) begin
-          alufn = io_dip[0+0+5-:6];
-          io_led = io_dip;
-          M_state_d = CALCULATE_state;
-        end
-      end
-      CALCULATE_state: begin
-        M_alu_a = a;
-        M_alu_b = b;
-        M_alu_alufn = alufn;
-        io_led[0+7-:8] = M_alu_aluOut[0+7-:8];
-        io_led[8+7-:8] = M_alu_aluOut[8+7-:8];
-        if (io_button[2+0-:1] == 1'h1) begin
-          M_state_d = INPUTA_state;
-        end
-      end
-    endcase
+    M_testALU_io_button = io_button;
+    M_testALU_io_dip = io_dip;
+    io_led = M_testALU_io_led;
   end
-  
-  always @(posedge clk) begin
-    if (rst == 1'b1) begin
-      M_state_q <= 1'h0;
-    end else begin
-      M_state_q <= M_state_d;
-    end
-  end
-  
 endmodule

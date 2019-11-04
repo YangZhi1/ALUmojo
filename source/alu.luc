@@ -39,6 +39,8 @@ module alu (
     compare.b = b;
     compare.alufn = alufn;
     
+    aluOut = 16x{0};
+    
     // use 2 MSBs to select which module we will enter to do ALU logic stuff
     case(alufn[5:4]){
       // given it starts with 00, we know its either add/sub/mult so we go to module adder
@@ -59,7 +61,7 @@ module alu (
     }
     z = adder.z;
     v = adder.v;
-    n = adder.n
-   
+    n = adder.n;
+    
   }
 }
