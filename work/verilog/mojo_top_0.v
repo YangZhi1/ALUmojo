@@ -35,9 +35,9 @@ module mojo_top_0 (
     .in(M_reset_cond_in),
     .out(M_reset_cond_out)
   );
-  wire [8-1:0] M_seg_seg;
+  wire [7-1:0] M_seg_seg;
   wire [4-1:0] M_seg_sel;
-  reg [28-1:0] M_seg_values;
+  reg [24-1:0] M_seg_values;
   multi_seven_seg_2 seg (
     .clk(clk),
     .rst(rst),
@@ -46,7 +46,7 @@ module mojo_top_0 (
     .sel(M_seg_sel)
   );
   wire [16-1:0] M_testALU_sum;
-  wire [28-1:0] M_testALU_sevensegdisp;
+  wire [24-1:0] M_testALU_sevensegdisp;
   wire [1-1:0] M_testALU_setv;
   wire [1-1:0] M_testALU_setn;
   wire [1-1:0] M_testALU_setz;
@@ -76,6 +76,9 @@ module mojo_top_0 (
     io_sel = 4'hf;
     io_led[0+7-:8] = M_testALU_sum[0+7-:8];
     io_led[8+7-:8] = M_testALU_sum[8+7-:8];
+    io_led[16+0+0-:1] = M_testALU_setz;
+    io_led[16+1+0-:1] = M_testALU_setv;
+    io_led[16+2+0-:1] = M_testALU_setn;
     M_testALU_io_button = io_button;
     M_testALU_io_dip = io_dip;
     M_seg_values = M_testALU_sevensegdisp;

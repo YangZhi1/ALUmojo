@@ -4,7 +4,7 @@ module multi_dec_ctr #(
     input clk,                // clock
     input rst,                // reset
     input inc,                // increment counter
-    output digits[DIGITS][8]  // digit values
+    output digits[DIGITS][6]  // digit values
   ) {
   
   .clk(clk), .rst(rst) {

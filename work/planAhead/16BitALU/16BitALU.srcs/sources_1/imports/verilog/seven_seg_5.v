@@ -5,8 +5,8 @@
 */
 
 module seven_seg_5 (
-    input [7:0] char,
-    output reg [7:0] segs
+    input [5:0] char,
+    output reg [6:0] segs
   );
   
   
@@ -15,79 +15,82 @@ module seven_seg_5 (
     
     case (char)
       1'h0: begin
-        segs = 8'h3f;
+        segs = 7'h3f;
       end
       1'h1: begin
-        segs = 8'h06;
+        segs = 7'h06;
       end
       2'h2: begin
-        segs = 8'h5b;
+        segs = 7'h5b;
       end
       2'h3: begin
-        segs = 8'h4f;
+        segs = 7'h4f;
       end
       3'h4: begin
-        segs = 8'h66;
+        segs = 7'h66;
       end
       3'h5: begin
-        segs = 8'h6d;
+        segs = 7'h6d;
       end
       3'h6: begin
-        segs = 8'h7d;
+        segs = 7'h7d;
       end
       3'h7: begin
-        segs = 8'h07;
+        segs = 7'h07;
       end
       4'h8: begin
-        segs = 8'h7f;
+        segs = 7'h7f;
       end
       4'h9: begin
-        segs = 8'h67;
+        segs = 7'h67;
       end
-      7'h43: begin
-        segs = 8'h39;
+      4'ha: begin
+        segs = 7'h39;
       end
-      7'h41: begin
-        segs = 8'h77;
+      4'hb: begin
+        segs = 7'h77;
       end
-      7'h64: begin
-        segs = 8'h5e;
+      4'hc: begin
+        segs = 7'h5e;
       end
-      7'h62: begin
-        segs = 8'h7c;
+      4'hd: begin
+        segs = 7'h7c;
       end
-      7'h65: begin
-        segs = 8'h7b;
+      4'he: begin
+        segs = 7'h7b;
       end
-      7'h72: begin
-        segs = 8'h50;
+      4'hf: begin
+        segs = 7'h50;
       end
-      7'h78: begin
-        segs = 8'h49;
+      5'h10: begin
+        segs = 7'h49;
       end
-      7'h4c: begin
-        segs = 8'h38;
+      5'h11: begin
+        segs = 7'h38;
       end
-      7'h68: begin
-        segs = 8'h74;
+      5'h12: begin
+        segs = 7'h74;
       end
-      7'h6e: begin
-        segs = 8'h54;
+      5'h13: begin
+        segs = 7'h54;
       end
-      7'h55: begin
-        segs = 8'h1c;
+      5'h14: begin
+        segs = 7'h1c;
       end
-      7'h76: begin
-        segs = 8'h00;
+      5'h15: begin
+        segs = 7'h00;
       end
-      7'h6d: begin
-        segs = 8'h79;
+      5'h16: begin
+        segs = 7'h79;
       end
-      7'h75: begin
-        segs = 8'h4c;
+      5'h17: begin
+        segs = 7'h79;
       end
-      7'h6c: begin
-        segs = 8'h0c;
+      5'h18: begin
+        segs = 7'h4c;
+      end
+      5'h19: begin
+        segs = 7'h0c;
       end
       default: begin
         segs = 7'h00;

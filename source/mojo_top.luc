@@ -45,6 +45,10 @@ module mojo_top (
     io_led[0] = testALU.sum[7:0]; // sets io_led[16:0] to be = sum in the testALU file
     io_led[1] = testALU.sum[15:8];
     
+    io_led[2][0] = testALU.setz; // setting values of z v and n on io_led row 3
+    io_led[2][1] = testALU.setv;
+    io_led[2][2] = testALU.setn;
+    
     testALU.io_button = io_button;
     testALU.io_dip = io_dip;
 

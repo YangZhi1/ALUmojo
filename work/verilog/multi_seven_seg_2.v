@@ -12,8 +12,8 @@
 module multi_seven_seg_2 (
     input clk,
     input rst,
-    input [27:0] values,
-    output reg [7:0] seg,
+    input [23:0] values,
+    output reg [6:0] seg,
     output reg [3:0] sel
   );
   
@@ -30,8 +30,8 @@ module multi_seven_seg_2 (
     .value(M_ctr_value)
   );
   
-  wire [8-1:0] M_seg_dec_segs;
-  reg [8-1:0] M_seg_dec_char;
+  wire [7-1:0] M_seg_dec_segs;
+  reg [6-1:0] M_seg_dec_char;
   seven_seg_5 seg_dec (
     .char(M_seg_dec_char),
     .segs(M_seg_dec_segs)
@@ -45,7 +45,7 @@ module multi_seven_seg_2 (
   );
   
   always @* begin
-    M_seg_dec_char = values[(M_ctr_value)*7+6-:7];
+    M_seg_dec_char = values[(M_ctr_value)*6+5-:6];
     seg = M_seg_dec_segs;
     M_digit_dec_in = M_ctr_value;
     sel = M_digit_dec_out;

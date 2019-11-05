@@ -5,7 +5,7 @@ module testALU (
     input io_button[5],      // use the 5 buttons to change states
     output sum[16],    // light up io_leds to show output of ALU (sum0-sum15)
     input io_dip [3][8],
-    output sevensegdisp [4][7],
+    output sevensegdisp [4][6],
     output setv,
     output setn,
     output setz
@@ -14,7 +14,7 @@ module testALU (
   
   .clk(clk){
     .rst(rst){
-      fsm state = {ADD1, ADD2, ADD3, ADD4, SUB1, SUB2, SUB3, SUB4, AND1, AND2, AND3, OR1, OR2, XOR1, XOR2, LDR, SHL1, SHL2, SHR1, SHR2, SRA1, SRA2, CMPEQ, CMPLT, CMPLE, MULT1, MULT2, MULT3, FINISH, WRONG};
+      fsm state = {START, ADD1, ADD2, ADD3, ADD4, SUB1, SUB2, AND1, AND2, AND3, OR1, OR2, XOR1, XOR2, LDR, SHL1, SHL2, SHR1, SHR2, SRA1, SRA2, CMPEQ, CMPLT, CMPLE, MULT1, MULT2, MULT3, ADD1ERR, ADD2ERR, ADD3ERR, ADD4ERR, SUB1ERR, SUB2ERR, AND1ERR, AND2ERR, AND3ERR, OR1ERR, OR2ERR, XOR1ERR, XOR2ERR, LDRERR, SHL1ERR, SHL2ERR, SHR1ERR, SHR2ERR, SRA1ERR, SRA2ERR, CMPEQERR, CMPLTERR, CMPLEERR, MULT1ERR, MULT2ERR, MULT3ERR, FINISH};
       alu alu;  // send values of a, b and alufn to alu to get the values
       
       
@@ -25,6 +25,9 @@ module testALU (
   
   const SPEED = 25; // how fast clock ticks, we will use clock[SPEED] to determine how fast, smaller SPEED is the faster the state changes
   sig wrong[16];    // wrong is used to add to a or b for aluOut to be "wrong"
+  sig atemp[16];
+  sig btemp[16];
+  sig alufntemp[6];
   
   always {
     alu.a = 16x{0};
@@ -36,9 +39,13 @@ module testALU (
     alu.setn = 0;
     alu.setv = 0;
     alu.setz = 0;
+    
+    atemp = 16x{0};
+    btemp = 16x{0};
+    alufntemp = 6x{0};
 
     sum = 16x{0};
-    sevensegdisp = {7b0,7b0,7b0, 7b0};
+    sevensegdisp = {6d0,6d0,6d0, 6d0};
     wrong = 16x{0}; 
     
     if(io_button[1] == 1){ // press middle button on io_shield to enter error state
@@ -46,12 +53,61 @@ module testALU (
     }
     
     case (state.q){
+
+//      state.START:
+//        sevensegdisp = {6d1, 6d1, 6d1, 6d1};
+//        if(io_button[3] == 1){      // if left button pressed, enter manual mode
+//          state.d = state.MANUAL;
+//        }
+//        else if(io_button[4] == 1){  // if right button is pressed, go AUTO state
+//          state.d = state.ADD1;
+//        }
+        
+      state.START:
+        sevensegdisp = {6d23, 6d11, 6d19, 6d21};  // (sideways m), A, n 
+        clock.d = 0;
+        
+        if(io_dip[2][0] == 1){ // down button press will enter select alufn value "state"
+          sevensegdisp = {6d11, 6d17, 6d20, 6d21}; // A L U
+          if(io_dip[2][0] == 1 && io_dip[2][3] == 1){
+            alufntemp = io_dip[0][5:0]; // first 6 switches on row 1 of io shield will be values of alufn
+          }
+        }
+        
+        if(io_dip[2][1] == 1){                           // if row 3 dip1 is switched on and down button is pressed we will choose the values of A
+          sevensegdisp = {6d11, 6d11, 6d11, 6d11};
+          if(io_dip[2][1] == 1 && io_dip[2][3] == 1){    // press down button again to confirm value of a
+            atemp[7:0] = io_dip[0];
+            atemp[15:8] = io_dip[1];
+          }
+        }
+        
+        if(io_dip[2][2] == 1){ // if row 3 dip2 is switched on and down button is pressed we will choose the values of B
+          sevensegdisp = {6d13, 6d13, 6d13, 6d13};
+          if(io_dip[2][2] == 1 && io_dip[2][3] == 1){                    // if down button pressed again then confirm b
+            btemp[7:0] = io_dip[0];
+            btemp[15:8] = io_dip[1];
+          }
+        }
+        if(io_dip[2][7] == 1){
+          alu.a = atemp;
+          alu.b = btemp;
+          alu.alufn = alufntemp;
+        }
+        
+        // if you get bored of this, press left button to enter auto state
+        if(io_button[3] == 1){
+          state.d = state.ADD1;
+        }
+       
     
+      // AUTO STATES
+
       state.ADD1:     // Normal case, just A + B
         alu.a = 16b1 + wrong; // set A to 0000000000000001
         alu.b = 16b1; // set B to 0000000000000001
         alu.alufn = 6b000000;
-        sevensegdisp = {"A","d","d", 7h1};
+        sevensegdisp = {6d11, 6d12, 6d12, 6d1};
         sum = alu.aluOut;  // sum will be read from mojo_top to use to light up respective io_led
         
         clock.d = clock.q + 1; // +1 to clock, so we can keep track of clock cycle to keep track of time
@@ -60,13 +116,14 @@ module testALU (
         // So if SPEED is 27 this is checking 27th bit of clock to see if it has "flipped" to 1
         // If it has flipped to 1 means some seconds has passed and we can move on to next state
 
-        if(clock.q[SPEED] == 1 && alu.aluOut == 16b10){
+
+        if(clock.q[SPEED] == 1  && alu.aluOut == 16b10){
           clock.d = 0;                     // reset clock, so we need to wait some more seconds
           state.d = state.ADD2;             // since its correct, we move to next state
         }
         
-        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b10){ // anything that is not 10 is a wrong "sum", so its an error
-          state.d = state.WRONG; // using the name wrong because I used it in mini-hardware project
+        else if(clock.q[SPEED] == 1  && alu.aluOut != 16b10){ // anything that is not 10 is a wrong "sum", so its an error
+          state.d = state.ADD1ERR; 
         }
         
       
@@ -74,7 +131,7 @@ module testALU (
         alu.a = 16b1000000000000000 + wrong; 
         alu.b = 16b1; 
         alu.alufn = 6b000000;
-        sevensegdisp = {"A","d","d", 7h2};
+        sevensegdisp = {6d11, 6d12, 6d12, 6d2};
         sum = alu.aluOut;
         clock.d = clock.q + 1;
         
@@ -83,8 +140,8 @@ module testALU (
           state.d = state.ADD3;
         }
         
-        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b1000000000000001 || alu.n != 1){ // anything that is not 10 is a wrong "sum", so its an error
-          state.d = state.WRONG; // using the name wrong because I used it in mini-hardware project
+        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b1000000000000001 || alu.n != 1){ 
+          state.d = state.ADD2ERR; 
         }
         
         
@@ -92,7 +149,7 @@ module testALU (
         alu.a = 16b1111111111111111 + wrong; // A + B will cause an overflow and aluOut will be 000000000...00
         alu.b = 16b1; 
         alu.alufn = 6b000000;
-        sevensegdisp = {"A" ,"d", "d", 7h3};
+        sevensegdisp = {6d11, 6d12, 6d12, 6d3};
         sum = alu.aluOut;
         clock.d = clock.q + 1;
         
@@ -101,8 +158,8 @@ module testALU (
           state.d = state.ADD4;
         }
         
-        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b0 || alu.z != 1){ // anything that is not 10 is a wrong "sum", so its an error
-          state.d = state.WRONG; // using the name wrong because I used it in mini-hardware project
+        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b0 || alu.z != 1){ 
+          state.d = state.ADD3ERR; 
         }
         
       
@@ -110,76 +167,43 @@ module testALU (
         alu.a = 16b111111111111111 + wrong; // <- 15 bits of 1, A+B = 16x{1};
         alu.b = 16b1; 
         alu.alufn = 6b000000;
-        sevensegdisp = {"A" ,"d", "d", 7h4};
+        sevensegdisp = {6d11 ,6d12, 6d12, 6d4};
         sum = alu.aluOut;
         clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b1000000000000000 && alu.v == 1){
           clock.d = 0;
-          state.d = state.AND1;
+          state.d = state.SUB1;
         }
         
-        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b1000000000000000 || alu.v != 1){ // anything that is not 10 is a wrong "sum", so its an error
-          state.d = state.WRONG; // using the name wrong because I used it in mini-hardware project
+        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b1000000000000000 || alu.v != 1){ 
+          state.d = state.ADD4ERR; 
         }
 
       
-      state.SUB1:     // 2-1 = 1
-        alu.a = 16b10 + wrong;
+      state.SUB1:     // 5-1 = 4
+        alu.a = 16b110101 + wrong;
         alu.b = 16b1;
         alu.alufn = 6b000001;
         sum = alu.aluOut;
-        sevensegdisp = {7b101,"U", "b", 7h1};
+        sevensegdisp = {6d5, 6d20, 6d13, 6d1};
         clock.d = clock.q + 1;
         
-        if(clock.q[SPEED] == 1 && alu.aluOut == 16b1){
+        if(clock.q[SPEED] == 1 && alu.aluOut == 16b110100){
           clock.d = 0;
           state.d = state.SUB2;
         }
-        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b1){ 
-          state.d = state.WRONG;
+        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b110100){ 
+          state.d = state.SUB1ERR;
         }
 
       state.SUB2:
-      // 1 - 1 = 0
-        alu.a = 16b1 + wrong;
-        alu.b = 16b1;
-        alu.alufn = 6b000001;
-        sum = alu.aluOut;
-        sevensegdisp = {7b101,"U", "b", 7h2};
-        clock.d = clock.q + 1;
-        
-        if(clock.q[SPEED] == 1 && alu.aluOut == 16b0 && alu.z == 1){
-          clock.d = 0;
-          state.d = state.SUB3;
-        }
-        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b0 || alu.z != 1){ 
-          state.d = state.WRONG;
-        }
-
-      state.SUB3:
-        // 
-        alu.a = 16b1000000000000000 + wrong;
-        alu.b = 16b1;
-        alu.alufn = 6b000001;
-        sum = alu.aluOut;
-        sevensegdisp = {7b1001,"U", "b", 7h3};
-        clock.d = clock.q + 1;
-        
-        if(clock.q[SPEED] == 1 && alu.aluOut == 16b111111111111111 && alu.v == 1){
-          clock.d = 0;
-          state.d = state.SUB4;
-        }
-        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b111111111111111 || alu.v != 1){ 
-          state.d = state.WRONG;
-        }
-
-      state.SUB4:  // negative number after subtraction: 10000...000
+      // bit 16 is 1. Check if alu.n is 1
         alu.a = 16b1000000000000001 + wrong;
-        alu.b = 16b1;
+        alu.b = 16b0000000000000001;
         alu.alufn = 6b000001;
         sum = alu.aluOut;
-        sevensegdisp = {7b1001 ,"U", "b", 7h4};
+        sevensegdisp = {6d5, 6d20, 6d13, 6d2};
         clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b1000000000000000 && alu.n == 1){
@@ -187,8 +211,43 @@ module testALU (
           state.d = state.AND1;
         }
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b1000000000000000 || alu.n != 1){ 
-          state.d = state.WRONG;
+          state.d = state.SUB2ERR;
         }
+
+
+//      state.SUB3: 
+//        // integer overflow, v = 1
+//        alu.a = 16b1000000000000000 + wrong; 
+//        alu.b = 16b1; 
+//        alu.alufn = 6b000001; 
+//        sum = alu.aluOut; 
+//        sevensegdisp = {6d5,6d20, 6d13, 6d3}; 
+//        clock.d = clock.q + 1; 
+         
+//        if(clock.q[SPEED] == 1 && alu.aluOut == 16b1111111111111111 && alu.v == 1){ 
+//          clock.d = 0; 
+//          state.d = state.SUB4; 
+//        } 
+//        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b1111111111111111 || alu.v != 1){  
+//          state.d = state.SUB3ERR; 
+//       } 
+ 
+//      state.SUB3:  
+      // 2-2 = 0, all bits will be 0
+//        alu.a = 16b10 + wrong; 
+//        alu.b = 16b10; 
+//        alu.alufn = 6b000001; 
+//        sum = alu.aluOut; 
+//        sevensegdisp = {6d5 ,6d20, 6d13, 6d4}; 
+//        clock.d = clock.q + 1; 
+         
+//        if(clock.q[SPEED] == 1 && alu.aluOut == 16b0 && alu.z == 1){ 
+//          clock.d = 0; 
+//          state.d = state.AND1; 
+//        } 
+//        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b0 || alu.z != 1){  
+//          state.d = state.SUB3ERR; 
+//        }
 
       state.AND1:
       // 1 and 1 in AND will give 1.
@@ -196,7 +255,7 @@ module testALU (
         alu.b = 16b1;
         alu.alufn = 6b011000;
         sum = alu.aluOut;
-        sevensegdisp = {"A" ,"n", "d", 7h1};
+        sevensegdisp = {6d11 ,6d19, 6d12, 6d1};
         clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b1){
@@ -204,7 +263,7 @@ module testALU (
           state.d = state.AND2;
         }
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b1){ 
-          state.d = state.WRONG;
+          state.d = state.AND1ERR;
         }
 
       state.AND2:
@@ -213,7 +272,7 @@ module testALU (
         alu.b = 16b0;
         alu.alufn = 6b011000;
         sum = alu.aluOut;
-        sevensegdisp = {"A" ,"n", "d", 7h2};
+        sevensegdisp = {6d11 ,6d19, 6d12, 6d2};
         clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b0){
@@ -221,7 +280,7 @@ module testALU (
           state.d = state.AND3;
         }
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b0){ 
-          state.d = state.WRONG;
+          state.d = state.AND2ERR;
         }
 
 
@@ -231,7 +290,7 @@ module testALU (
         alu.b = 16b1;
         alu.alufn = 6b011000;
         sum = alu.aluOut;
-        sevensegdisp = {"A" ,"n", "d", 7h3};
+        sevensegdisp = {6d11 ,6d19, 6d12, 6d3};
         clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b0){
@@ -239,7 +298,7 @@ module testALU (
           state.d = state.OR1;
         }
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b0){ 
-          state.d = state.WRONG;
+          state.d = state.AND3ERR;
         }
 
       state.OR1:
@@ -248,7 +307,7 @@ module testALU (
         alu.b = 16b0;
         alu.alufn = 6b011110;
         sum = alu.aluOut;
-        sevensegdisp = {7h0 ,"r", 7h1, "v"};
+        sevensegdisp = {6d0 ,6d15, 6d1, 6d21};
         clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b1){
@@ -256,7 +315,7 @@ module testALU (
           state.d = state.OR2;
         }
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b1){ 
-          state.d = state.WRONG;
+          state.d = state.OR1ERR;
         }
 
       state.OR2:
@@ -265,7 +324,7 @@ module testALU (
         alu.b = 16b0;
         alu.alufn = 6b011110;
         sum = alu.aluOut;
-        sevensegdisp = {7h0,"r", 7h2, "v"};
+        sevensegdisp = {6d0 ,6d15, 6d2, 6d21};
         clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b0){
@@ -273,7 +332,7 @@ module testALU (
           state.d = state.XOR1;
         }
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b0){ 
-          state.d = state.WRONG;
+          state.d = state.OR2ERR;
         }
 
       state.XOR1:
@@ -282,7 +341,7 @@ module testALU (
         alu.b = 16b1;
         alu.alufn = 6b010110;
         sum = alu.aluOut;
-        sevensegdisp = {"x", 7h0 ,"r", 7h1};
+        sevensegdisp = {6d16, 6d0 ,6d15, 6d1};
         clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b1){
@@ -290,7 +349,7 @@ module testALU (
           state.d = state.XOR2;
         }
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b1){ 
-          state.d = state.WRONG;
+          state.d = state.XOR1ERR;
         }
 
       state.XOR2:
@@ -299,7 +358,7 @@ module testALU (
         alu.b = 16b1;
         alu.alufn = 6b010110;
         sum = alu.aluOut;
-        sevensegdisp = {"x", 7h0 ,"r", 7h2};
+        sevensegdisp = {6d16, 6d0 ,6d15, 6d2};
         clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b0){
@@ -307,7 +366,7 @@ module testALU (
           state.d = state.LDR;
         }
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b0){ 
-          state.d = state.WRONG;
+          state.d = state.XOR2ERR;
         }
 
       state.LDR:
@@ -315,7 +374,7 @@ module testALU (
         alu.a = 16b110 + wrong;
         alu.alufn = 6b011010;
         sum = alu.aluOut;
-        sevensegdisp = {"L", "d" ,"r", "v"};
+        sevensegdisp = {6d17, 6d12 ,6d15, 6d21};
         clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b110){
@@ -323,7 +382,7 @@ module testALU (
           state.d = state.SHL1;
         }
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b110){ 
-          state.d = state.WRONG;
+          state.d = state.LDRERR;
         }
 
       state.SHL1:
@@ -332,7 +391,7 @@ module testALU (
         alu.b = 16b1;
         alu.alufn = 6b100000;
         sum = alu.aluOut;
-        sevensegdisp = {7h5, "h" ,"L", 7h1};
+        sevensegdisp = {6d5, 6d18 ,6d17, 6d1};
         clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b1111111111111110){
@@ -340,7 +399,7 @@ module testALU (
           state.d = state.SHL2;
         }
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b1111111111111110){ 
-          state.d = state.WRONG;
+          state.d = state.SHL1ERR;
         }
 
       state.SHL2:
@@ -349,7 +408,7 @@ module testALU (
         alu.b = 16b1;
         alu.alufn = 6b100000;
         sum = alu.aluOut;
-        sevensegdisp = {7h5, "h" ,"L", 7h2};
+        sevensegdisp = {6d5, 6d18 ,6d17, 6d2};
         clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b11110){
@@ -357,7 +416,7 @@ module testALU (
           state.d = state.SHR1;
         }
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b11110){ 
-          state.d = state.WRONG;
+          state.d = state.SHL2ERR;
         }
 
 
@@ -367,7 +426,7 @@ module testALU (
         alu.b = 16b1;
         alu.alufn = 6b100001;
         sum = alu.aluOut;
-        sevensegdisp = {7h5, "h" ,"r", 7h1};
+        sevensegdisp = {6d5, 6d18 ,6d15, 6d1};
         clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b11){
@@ -375,7 +434,7 @@ module testALU (
           state.d = state.SHR2;
         }
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b11){ 
-          state.d = state.WRONG;
+          state.d = state.SHR1ERR;
         }
       
       state.SHR2:
@@ -384,7 +443,7 @@ module testALU (
         alu.b = 16b1;
         alu.alufn = 6b100001;
         sum = alu.aluOut;
-        sevensegdisp = {7h5, "h" ,"r", 7h2};
+        sevensegdisp = {6d5, 6d18 ,6d15, 6d2};
         clock.d = clock.q + 1; 
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b0110000000000000){
@@ -392,7 +451,7 @@ module testALU (
           state.d = state.SRA1;
         }
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b0110000000000000){ 
-          state.d = state.WRONG;
+          state.d = state.SHR2ERR;
         }
 
       state.SRA1:
@@ -401,7 +460,7 @@ module testALU (
         alu.b = 16b1;
         alu.alufn = 6b100011;
         sum = alu.aluOut;
-        sevensegdisp = {7h5, "r" ,"A", 7h1};
+        sevensegdisp = {6d5, 6d15 ,6d11, 6d1};
         clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b11){
@@ -409,7 +468,7 @@ module testALU (
           state.d = state.SRA2;
         }
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b11){ 
-          state.d = state.WRONG;
+          state.d = state.SRA1ERR;
         }
 
       state.SRA2:
@@ -418,7 +477,7 @@ module testALU (
         alu.b = 16b1;
         alu.alufn = 6b100011;
         sum = alu.aluOut;
-        sevensegdisp = {7h5, "r" ,"A", 7h2}; // 101 = 5, which looks like S (We will get SrA)
+        sevensegdisp = {6d5, 6d15 ,6d11, 6d2}; // 101 = 5, which looks like S (We will get SrA)
         clock.d = clock.q + 1;
 
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b1111000000000000){
@@ -426,7 +485,7 @@ module testALU (
           state.d = state.CMPEQ;
         }
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b1111000000000000){ 
-          state.d = state.WRONG;
+          state.d = state.SRA2ERR;
         }
 
       state.CMPEQ:
@@ -434,7 +493,7 @@ module testALU (
         alu.setz = 16b0 + wrong;
         alu.alufn = 6b110011;
         sum = alu.aluOut;
-        sevensegdisp = {"C","e", 7h9, "v"}; // (Ce9 looks a bit like Ceq)
+        sevensegdisp = {6d10,6d14, 6d9, 6d21}; // (Ce9 looks a bit like Ceq)
         clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b0){
@@ -442,7 +501,7 @@ module testALU (
           state.d = state.CMPLT;
         }
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b0){ 
-          state.d = state.WRONG;
+          state.d = state.CMPEQERR;
         }
 
       state.CMPLT:
@@ -451,7 +510,7 @@ module testALU (
         alu.setn = 16b0;
         alu.alufn = 6b110101;
         sum = alu.aluOut;
-        sevensegdisp = {"C","L", 7h7, "v"}; // CL7 (looks a bit like CLT)
+        sevensegdisp = {6d10,6d17, 6d7, 6d21}; // CL7 (looks a bit like CLT)
         clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b1){
@@ -459,7 +518,7 @@ module testALU (
           state.d = state.CMPLE;
         }
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b1){ 
-          state.d = state.WRONG;
+          state.d = state.CMPLTERR;
         }
 
       state.CMPLE:
@@ -469,7 +528,7 @@ module testALU (
         alu.setn = 16b0;
         alu.alufn = 6b110111;
         sum = alu.aluOut;
-        sevensegdisp = {"C","L","E", "v"};
+        sevensegdisp = {6d10,6d17,6d22, 6d21};
         clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b1){
@@ -477,7 +536,7 @@ module testALU (
           state.d = state.MULT1;
         }
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b1){ 
-          state.d = state.WRONG;
+          state.d = state.CMPLEERR;
         }
 
       state.MULT1:
@@ -486,7 +545,7 @@ module testALU (
         alu.b = 16b1000;
         alu.alufn = 6b000010;
         sum = alu.aluOut;
-        sevensegdisp = {"m","u","l", 7h1};
+        sevensegdisp = {6d23,6d20,6d17, 6d1};
         clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b1000000){
@@ -494,7 +553,7 @@ module testALU (
           state.d = state.MULT2;
         }
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b100){ 
-          state.d = state.WRONG;
+          state.d = state.MULT1ERR;
         }
 
         
@@ -504,7 +563,7 @@ module testALU (
         alu.b = 16b1000;
         alu.alufn = 6b000010;
         sum = alu.aluOut;
-        sevensegdisp = {"m","u","l", 7h2};
+        sevensegdisp = {6d23,6d20,6d17, 6d2};
         clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b0){
@@ -512,7 +571,7 @@ module testALU (
           state.d = state.MULT3;
         }
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b0){ 
-          state.d = state.WRONG;
+          state.d = state.MULT2ERR;
         }
 
       state.MULT3:
@@ -521,7 +580,7 @@ module testALU (
         alu.b = 16b1111111111111111;
         alu.alufn = 6b000010;
         sum = alu.aluOut;
-        sevensegdisp = {"m","u","l", 7h3}; // binary 11 = 3
+        sevensegdisp = {6d23,6d20,6d17, 6d3}; // binary 11 = 3
         clock.d = clock.q + 1;
         
         if(clock.q[SPEED] == 1 && alu.aluOut == 16b1){
@@ -529,19 +588,97 @@ module testALU (
           state.d = state.FINISH;  // INSERT LAST STATE HERE
         }
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b1){ 
-          state.d = state.WRONG;
+          state.d = state.MULT3ERR;
         }
         
       state.FINISH:
-        sevensegdisp = {"e","n","d", 7h0}; // leave last digit as empty
+        sevensegdisp = {6d14,6d19,6d12, 6d0}; // leave last digit as empty
         clock.d = clock.q + 1;
+        if (io_button[4] == 1) { // if we press right button go back start state
+          state.d = state.START;
+        }
 
-      state.WRONG:
-        sevensegdisp = {"e","r","r", 7h0};
-        clock.d = clock.q + 1;
+
+      // Error States
+
+      state.ADD1ERR:
+        sevensegdisp = {6d11,6d12,6d1,6d14};
         
-        // This one is just to blink the leds to show its error
-        sum = 16x{clock.q[23]};
+      state.ADD2ERR:
+        sevensegdisp = {6d11,6d12,6d2,6d14};
+        
+      state.ADD3ERR:
+        sevensegdisp = {6d11,6d12,6d3,6d14};
+        
+      state.ADD4ERR:
+        sevensegdisp = {6d11,6d12,6d4,6d14};
+
+      state.SUB1ERR:
+        sevensegdisp = {6d20,6d13,6d1,6d14};
+        
+      state.SUB2ERR:
+        sevensegdisp = {6d20,6d13,6d2,6d14};
+
+      state.AND1ERR:
+        sevensegdisp = {6d11,6d19,6d1,6d14};
+        
+      state.AND2ERR:
+        sevensegdisp = {6d11,6d19,6d2,6d14};
+        
+      state.AND3ERR:
+        sevensegdisp = {6d11,6d19,6d3,6d14};
+        
+      state.OR1ERR:
+        sevensegdisp = {6d0,6d15,6d1,6d14};
+        
+      state.OR2ERR:
+        sevensegdisp = {6d0,6d15,6d2,6d14};
+
+      state.XOR1ERR:
+        sevensegdisp = {6d16,6d15,6d1,6d14};
+        
+      state.XOR2ERR:
+        sevensegdisp = {6d16,6d15,6d2,6d14}; 
+
+      state.LDRERR:
+        sevensegdisp = {6d17,6d12,6d15,6d14}; 
+
+      state.SHL1ERR:
+        sevensegdisp = {6d18,6d17,6d1,6d14};
+        
+      state.SHL2ERR:
+        sevensegdisp = {6d18,6d17,6d2,6d14}; 
+
+      state.SHR1ERR:
+        sevensegdisp = {6d18,6d15,6d1,6d14};
+        
+      state.SHR2ERR:
+        sevensegdisp = {6d18,6d15,6d2,6d14}; 
+
+      state.SRA1ERR:
+        sevensegdisp = {6d15,6d11,6d1,6d14};
+        
+      state.SRA2ERR:
+        sevensegdisp = {6d15,6d11,6d2,6d14}; 
+
+      state.CMPEQERR:
+        sevensegdisp = {6d10,6d23,6d22,6d14};
+        
+      state.CMPLTERR:
+        sevensegdisp = {6d10,6d23,6d17,6d14}; 
+
+      state.CMPLEERR:
+        sevensegdisp = {6d10,6d17,6d22,6d14}; 
+
+      state.MULT1ERR:
+        sevensegdisp = {6d23,6d17,6d1,6d14}; 
+
+      state.MULT2ERR:
+        sevensegdisp = {6d23,6d17,6d2,6d14};
+
+      state.MULT3ERR:
+        sevensegdisp = {6d23,6d17,6d3,6d14}; 
+
     }
     
   }

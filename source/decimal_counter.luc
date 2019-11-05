@@ -3,11 +3,11 @@ module decimal_counter (
     input rst,      // reset
     input inc,      // increment the counter
     output ovf,     // counter overflowed
-    output value[8] // current value
+    output value[6] // current value
   ) {
   
   .clk(clk), .rst(rst) {
-    dff val[8];     // value storage
+    dff val[6];     // value storage -> we using 6 bits to store numbers
   }
 
   always {

@@ -1,40 +1,40 @@
 module seven_seg ( // https://alchitry.com/blogs/tutorials/io-element <- follow this to know which numbers to choose to light up
-    input char[8],
-    output segs[8]
+    input char[6], // using 6 bits to store char info: 2^6-1 = 31
+    output segs[7] // using 7 bits to represent which light on LED segment we want to light up
   ) {
 
   always {
     case (char) {
-      0: segs = 8b00111111; // use 0 as O
-      1: segs = 8b00000110;
-      2: segs = 8b01011011;
-      3: segs = 8b01001111;
-      4: segs = 8b01100110;
-      5: segs = 8b01101101; // for some cases we gonna substitute 5 as an S
-      6: segs = 8b01111101;
-      7: segs = 8b00000111;
-      8: segs = 8b01111111;
-      9: segs = 8b01100111;
+      0: segs = 7b0111111; // use 0 as O
+      1: segs = 7b0000110;
+      2: segs = 7b1011011;
+      3: segs = 7b1001111;
+      4: segs = 7b1100110;
+      5: segs = 7b1101101; // for some cases we gonna substitute 5 as an S
+      6: segs = 7b1111101;
+      7: segs = 7b0000111;
+      8: segs = 7b1111111;
+      9: segs = 7b1100111;
       
       // alphabets we can show using 7 seg light to display our states so easier to tell
-      "C": segs = 8b00111001; // 0345
-      "A": segs = 8b01110111; // only 7 and 3 not lit
-      "d": segs = 8b01011110; //0, 5, 7 not lit
-      "b": segs = 8b01111100; // 2,3,4,5,6
-      "e": segs = 8b01111011; // 2 and 7 not lit
-      "r": segs = 8b01010000; // 4 and 6 lit
-      "x": segs = 8b01001001; // we let x be 3 in chinese (3 vertical lines) -> 0,3,6
-      "L": segs = 8b00111000; // 3,4,5 are lit
-      "h": segs = 8b01110100; // 2,4,5,6 are lit
-      "n": segs = 8b01010100; //2,4,6
-      "U": segs = 8b00011100; //2,3,4
-      "v": segs = 8b00000000; // special character used to turn off the specific LED segment
-      "E": segs = 8b01111001;// 0,3,4,5,6
-        
+      10: segs = 7b0111001; // 0345 -----------------------------------------------------"C"
+      11: segs = 7b1110111; // only 7 and 3 not lit  ------------------------------------"A"
+      12: segs = 7b1011110; //0, 5, 7 not lit -------------------------------------------"d"
+      13: segs = 7b1111100; // 2,3,4,5,6-------------------------------------------------"b"
+      14: segs = 7b1111011; // 2 and 7 not lit-------------------------------------------"e"
+      15: segs = 7b1010000; // 4 and 6 lit-----------------------------------------------"r"
+      16: segs = 7b1001001; // we let x be 3 in chinese (3 vertical lines) -> 0,3,6------"x"
+      17: segs = 7b0111000; // 3,4,5 are lit---------------------------------------------"L"
+      18: segs = 7b1110100; // 2,4,5,6 are lit-------------------------------------------"h"
+      19: segs = 7b1010100; //2,4,6------------------------------------------------------"n"
+      20: segs = 7b0011100; //2,3,4------------------------------------------------------"U"
+      21: segs = 7b0000000; // special character used to turn off the specific LED segment --> No light
+      22: segs = 7b1111001;// 0,3,4,5,6--------------------------------------------------"E"
+       
       // exclusively for multiply, so we need to look in the orientation where IO Shield reads normal to you (not upside down/tilted 90 degrees)
-      "m": segs = 8b01111001; // 0,3,4,5,6
-      "u": segs = 8b01001100; // 2,3,6 *NOTE: this u is "tilted to the side"
-      "l": segs = 8b00001100; // 2,3
+      23: segs = 7b1111001; // 0,3,4,5,6 -----------------------------------------"m"
+      24: segs = 7b1001100; // 2,3,6 *NOTE: this u is "tilted to the side"--------"u"
+      25: segs = 7b0001100; // 2,3------------------------------------------------"l"
       
       default: segs = 7b0000000;
     }
