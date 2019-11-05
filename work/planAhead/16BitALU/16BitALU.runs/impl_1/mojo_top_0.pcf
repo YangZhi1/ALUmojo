@@ -1,5 +1,5 @@
 //! **************************************************************************
-// Written by: Map P.20131013 on Wed Nov 06 00:04:29 2019
+// Written by: Map P.20131013 on Wed Nov 06 01:47:17 2019
 //! **************************************************************************
 
 SCHEMATIC START;
@@ -57,6 +57,8 @@ COMP "led[7]" LOCATE = SITE "P123" LEVEL 1;
 COMP "io_dip(20)" LOCATE = SITE "P67" LEVEL 1;
 COMP "io_dip(21)" LOCATE = SITE "P66" LEVEL 1;
 COMP "io_dip(22)" LOCATE = SITE "P58" LEVEL 1;
+COMP "io_dip(23)" LOCATE = SITE "P57" LEVEL 1;
+COMP "io_dip(19)" LOCATE = SITE "P74" LEVEL 1;
 COMP "avr_tx" LOCATE = SITE "P55" LEVEL 1;
 COMP "io_dip[10]" LOCATE = SITE "P105" LEVEL 1;
 COMP "io_dip[11]" LOCATE = SITE "P104" LEVEL 1;
@@ -64,11 +66,9 @@ COMP "io_dip[12]" LOCATE = SITE "P102" LEVEL 1;
 COMP "io_dip[13]" LOCATE = SITE "P101" LEVEL 1;
 COMP "io_dip[14]" LOCATE = SITE "P100" LEVEL 1;
 COMP "io_dip[15]" LOCATE = SITE "P99" LEVEL 1;
-COMP "io_dip[23]" LOCATE = SITE "P57" LEVEL 1;
 COMP "io_dip[16]" LOCATE = SITE "P79" LEVEL 1;
 COMP "io_dip[17]" LOCATE = SITE "P78" LEVEL 1;
 COMP "io_dip[18]" LOCATE = SITE "P75" LEVEL 1;
-COMP "io_dip[19]" LOCATE = SITE "P74" LEVEL 1;
 COMP "spi_ss" LOCATE = SITE "P48" LEVEL 1;
 COMP "io_led[10]" LOCATE = SITE "P82" LEVEL 1;
 COMP "io_led[11]" LOCATE = SITE "P83" LEVEL 1;
@@ -89,35 +89,35 @@ TIMEGRP clk = BEL "testALU/M_clock_q_10" BEL "testALU/M_clock_q_11" BEL
         "testALU/M_clock_q_12" BEL "testALU/M_clock_q_13" BEL
         "testALU/M_clock_q_14" BEL "testALU/M_clock_q_15" BEL
         "testALU/M_clock_q_20" BEL "testALU/M_clock_q_16" BEL
-        "testALU/M_clock_q_21" BEL "testALU/M_clock_q_17" BEL
-        "testALU/M_clock_q_22" BEL "testALU/M_clock_q_18" BEL
-        "testALU/M_clock_q_23" BEL "testALU/M_clock_q_24" BEL
-        "testALU/M_clock_q_19" BEL "testALU/M_clock_q_25" BEL
-        "testALU/M_state_q_FSM_FFd47_1" BEL "testALU/M_state_q_FSM_FFd54_1"
+        "testALU/M_clock_q_21" BEL "testALU/M_clock_q_22" BEL
+        "testALU/M_clock_q_17" BEL "testALU/M_clock_q_18" BEL
+        "testALU/M_clock_q_23" BEL "testALU/M_clock_q_19" BEL
+        "testALU/M_clock_q_24" BEL "testALU/M_clock_q_25" BEL
+        "testALU/M_state_q_FSM_FFd47_1" BEL "testALU/M_state_q_FSM_FFd47_2"
         BEL "testALU/M_state_q_FSM_FFd49_1" BEL "testALU/M_state_q_FSM_FFd3_1"
         BEL "testALU/M_state_q_FSM_FFd3_2" BEL "testALU/M_state_q_FSM_FFd10"
         BEL "testALU/M_state_q_FSM_FFd11" BEL "testALU/M_state_q_FSM_FFd12"
         BEL "testALU/M_state_q_FSM_FFd13" BEL "testALU/M_state_q_FSM_FFd14"
-        BEL "testALU/M_state_q_FSM_FFd15" BEL "testALU/M_state_q_FSM_FFd20"
+        BEL "testALU/M_state_q_FSM_FFd20" BEL "testALU/M_state_q_FSM_FFd15"
         BEL "testALU/M_state_q_FSM_FFd21" BEL "testALU/M_state_q_FSM_FFd16"
         BEL "testALU/M_state_q_FSM_FFd22" BEL "testALU/M_state_q_FSM_FFd17"
-        BEL "testALU/M_state_q_FSM_FFd23" BEL "testALU/M_state_q_FSM_FFd18"
-        BEL "testALU/M_state_q_FSM_FFd24" BEL "testALU/M_state_q_FSM_FFd19"
-        BEL "testALU/M_state_q_FSM_FFd25" BEL "testALU/M_state_q_FSM_FFd30"
+        BEL "testALU/M_state_q_FSM_FFd18" BEL "testALU/M_state_q_FSM_FFd23"
+        BEL "testALU/M_state_q_FSM_FFd19" BEL "testALU/M_state_q_FSM_FFd24"
+        BEL "testALU/M_state_q_FSM_FFd30" BEL "testALU/M_state_q_FSM_FFd25"
         BEL "testALU/M_state_q_FSM_FFd31" BEL "testALU/M_state_q_FSM_FFd26"
         BEL "testALU/M_state_q_FSM_FFd32" BEL "testALU/M_state_q_FSM_FFd27"
-        BEL "testALU/M_state_q_FSM_FFd33" BEL "testALU/M_state_q_FSM_FFd28"
-        BEL "testALU/M_state_q_FSM_FFd34" BEL "testALU/M_state_q_FSM_FFd29"
-        BEL "testALU/M_state_q_FSM_FFd35" BEL "testALU/M_state_q_FSM_FFd40"
+        BEL "testALU/M_state_q_FSM_FFd28" BEL "testALU/M_state_q_FSM_FFd33"
+        BEL "testALU/M_state_q_FSM_FFd29" BEL "testALU/M_state_q_FSM_FFd34"
+        BEL "testALU/M_state_q_FSM_FFd40" BEL "testALU/M_state_q_FSM_FFd35"
         BEL "testALU/M_state_q_FSM_FFd41" BEL "testALU/M_state_q_FSM_FFd36"
         BEL "testALU/M_state_q_FSM_FFd42" BEL "testALU/M_state_q_FSM_FFd37"
-        BEL "testALU/M_state_q_FSM_FFd43" BEL "testALU/M_state_q_FSM_FFd38"
-        BEL "testALU/M_state_q_FSM_FFd44" BEL "testALU/M_state_q_FSM_FFd39"
-        BEL "testALU/M_state_q_FSM_FFd45" BEL "testALU/M_state_q_FSM_FFd50"
+        BEL "testALU/M_state_q_FSM_FFd38" BEL "testALU/M_state_q_FSM_FFd43"
+        BEL "testALU/M_state_q_FSM_FFd39" BEL "testALU/M_state_q_FSM_FFd44"
+        BEL "testALU/M_state_q_FSM_FFd50" BEL "testALU/M_state_q_FSM_FFd45"
         BEL "testALU/M_state_q_FSM_FFd51" BEL "testALU/M_state_q_FSM_FFd46"
         BEL "testALU/M_state_q_FSM_FFd52" BEL "testALU/M_state_q_FSM_FFd47"
-        BEL "testALU/M_state_q_FSM_FFd53" BEL "testALU/M_state_q_FSM_FFd48"
-        BEL "testALU/M_state_q_FSM_FFd54" BEL "testALU/M_state_q_FSM_FFd49"
+        BEL "testALU/M_state_q_FSM_FFd48" BEL "testALU/M_state_q_FSM_FFd53"
+        BEL "testALU/M_state_q_FSM_FFd49" BEL "testALU/M_state_q_FSM_FFd54"
         BEL "testALU/M_state_q_FSM_FFd1" BEL "testALU/M_state_q_FSM_FFd2" BEL
         "testALU/M_state_q_FSM_FFd3" BEL "testALU/M_state_q_FSM_FFd4" BEL
         "testALU/M_state_q_FSM_FFd5" BEL "testALU/M_state_q_FSM_FFd6" BEL
@@ -126,11 +126,8 @@ TIMEGRP clk = BEL "testALU/M_clock_q_10" BEL "testALU/M_clock_q_11" BEL
         "testALU/M_clock_q_2" BEL "testALU/M_clock_q_3" BEL
         "testALU/M_clock_q_4" BEL "testALU/M_clock_q_5" BEL
         "testALU/M_clock_q_6" BEL "testALU/M_clock_q_7" BEL
-        "testALU/M_clock_q_8" BEL "testALU/M_clock_q_9" BEL
-        "testALU/M_state_q_FSM_FFd25_1" BEL "testALU/M_state_q_FSM_FFd25_2"
-        BEL "testALU/M_state_q_FSM_FFd27_1" BEL
-        "testALU/M_state_q_FSM_FFd27_2" BEL "clk_BUFGP/BUFG" BEL
-        "reset_cond/M_stage_q_3" BEL "reset_cond/M_stage_q_2" BEL
+        "testALU/M_clock_q_8" BEL "testALU/M_clock_q_9" BEL "clk_BUFGP/BUFG"
+        BEL "reset_cond/M_stage_q_3" BEL "reset_cond/M_stage_q_2" BEL
         "reset_cond/M_stage_q_1" BEL "reset_cond/M_stage_q_0" BEL
         "seg/ctr/M_ctr_q_2" BEL "seg/ctr/M_ctr_q_0" BEL "seg/ctr/M_ctr_q_1"
         BEL "seg/ctr/M_ctr_q_5" BEL "seg/ctr/M_ctr_q_3" BEL

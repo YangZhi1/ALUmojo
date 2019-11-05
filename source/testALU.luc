@@ -9,6 +9,7 @@ module testALU (
     output setv,
     output setn,
     output setz
+    
   ) {
 
   
@@ -40,11 +41,11 @@ module testALU (
     alu.setv = 0;
     alu.setz = 0;
     
-    atemp = 16x{0};
-    btemp = 16x{0};
-    alufntemp = 6x{0};
+    atemp = 16hxx;       // atemp and btemp need to remember previous values otherwise 
+    btemp = 16hxx;       // aluOut will always be 0
+    alufntemp = 16hxx;
 
-    sum = 16x{0};
+    sum = alu.aluOut;
     sevensegdisp = {6d0,6d0,6d0, 6d0};
     wrong = 16x{0}; 
     
@@ -53,30 +54,21 @@ module testALU (
     }
     
     case (state.q){
-
-//      state.START:
-//        sevensegdisp = {6d1, 6d1, 6d1, 6d1};
-//        if(io_button[3] == 1){      // if left button pressed, enter manual mode
-//          state.d = state.MANUAL;
-//        }
-//        else if(io_button[4] == 1){  // if right button is pressed, go AUTO state
-//          state.d = state.ADD1;
-//        }
         
       state.START:
         sevensegdisp = {6d23, 6d11, 6d19, 6d21};  // (sideways m), A, n 
-        clock.d = 0;
+        clock.d = 0;   
         
-        if(io_dip[2][0] == 1){ // down button press will enter select alufn value "state"
+        if(io_dip[2][0] == 1){ // dip switch 1 of row 3 will enter alufn selection state
           sevensegdisp = {6d11, 6d17, 6d20, 6d21}; // A L U
-          if(io_dip[2][0] == 1 && io_dip[2][3] == 1){
+          if(io_button[2] == 1 && io_dip[2][0] == 1){  // press button to store
             alufntemp = io_dip[0][5:0]; // first 6 switches on row 1 of io shield will be values of alufn
           }
         }
         
         if(io_dip[2][1] == 1){                           // if row 3 dip1 is switched on and down button is pressed we will choose the values of A
           sevensegdisp = {6d11, 6d11, 6d11, 6d11};
-          if(io_dip[2][1] == 1 && io_dip[2][3] == 1){    // press down button again to confirm value of a
+          if(io_button[2] == 1 && io_dip[2][1] == 1){    // press down button again to confirm value of a
             atemp[7:0] = io_dip[0];
             atemp[15:8] = io_dip[1];
           }
@@ -84,16 +76,19 @@ module testALU (
         
         if(io_dip[2][2] == 1){ // if row 3 dip2 is switched on and down button is pressed we will choose the values of B
           sevensegdisp = {6d13, 6d13, 6d13, 6d13};
-          if(io_dip[2][2] == 1 && io_dip[2][3] == 1){                    // if down button pressed again then confirm b
+          if(io_button[2] == 1 && io_dip[2][2] == 1){                    // if down button pressed again then confirm b
             btemp[7:0] = io_dip[0];
             btemp[15:8] = io_dip[1];
           }
         }
-        if(io_dip[2][7] == 1){
-          alu.a = atemp;
-          alu.b = btemp;
-          alu.alufn = alufntemp;
-        }
+
+        alu.a = atemp;
+        alu.b = btemp;
+        alu.alufn = alufntemp;
+        sum = alu.aluOut;
+        setv = alu.v;
+        setn = alu.n;
+        setz = alu.z;
         
         // if you get bored of this, press left button to enter auto state
         if(io_button[3] == 1){
@@ -213,41 +208,6 @@ module testALU (
         else if(clock.q[SPEED] == 1 && alu.aluOut != 16b1000000000000000 || alu.n != 1){ 
           state.d = state.SUB2ERR;
         }
-
-
-//      state.SUB3: 
-//        // integer overflow, v = 1
-//        alu.a = 16b1000000000000000 + wrong; 
-//        alu.b = 16b1; 
-//        alu.alufn = 6b000001; 
-//        sum = alu.aluOut; 
-//        sevensegdisp = {6d5,6d20, 6d13, 6d3}; 
-//        clock.d = clock.q + 1; 
-         
-//        if(clock.q[SPEED] == 1 && alu.aluOut == 16b1111111111111111 && alu.v == 1){ 
-//          clock.d = 0; 
-//          state.d = state.SUB4; 
-//        } 
-//        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b1111111111111111 || alu.v != 1){  
-//          state.d = state.SUB3ERR; 
-//       } 
- 
-//      state.SUB3:  
-      // 2-2 = 0, all bits will be 0
-//        alu.a = 16b10 + wrong; 
-//        alu.b = 16b10; 
-//        alu.alufn = 6b000001; 
-//        sum = alu.aluOut; 
-//        sevensegdisp = {6d5 ,6d20, 6d13, 6d4}; 
-//        clock.d = clock.q + 1; 
-         
-//        if(clock.q[SPEED] == 1 && alu.aluOut == 16b0 && alu.z == 1){ 
-//          clock.d = 0; 
-//          state.d = state.AND1; 
-//        } 
-//        else if(clock.q[SPEED] == 1 && alu.aluOut != 16b0 || alu.z != 1){  
-//          state.d = state.SUB3ERR; 
-//        }
 
       state.AND1:
       // 1 and 1 in AND will give 1.
