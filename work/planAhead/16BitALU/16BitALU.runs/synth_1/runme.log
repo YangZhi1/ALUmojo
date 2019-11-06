@@ -59,10 +59,10 @@ Elaborating module <shifter_9>.
 Elaborating module <boolean_10>.
 
 Elaborating module <compare_11>.
-WARNING:HDLCompiler:413 - "C:/Users/ymf_m/Documents/mojo/16BitALU/work/planAhead/16BitALU/16BitALU.srcs/sources_1/imports/verilog/testALU_3.v" Line 128: Result of 16-bit expression is truncated to fit in 6-bit target.
-WARNING:HDLCompiler:413 - "C:/Users/ymf_m/Documents/mojo/16BitALU/work/planAhead/16BitALU/16BitALU.srcs/sources_1/imports/verilog/testALU_3.v" Line 491: Result of 16-bit expression is truncated to fit in 1-bit target.
-WARNING:HDLCompiler:413 - "C:/Users/ymf_m/Documents/mojo/16BitALU/work/planAhead/16BitALU/16BitALU.srcs/sources_1/imports/verilog/testALU_3.v" Line 506: Result of 16-bit expression is truncated to fit in 1-bit target.
-WARNING:HDLCompiler:413 - "C:/Users/ymf_m/Documents/mojo/16BitALU/work/planAhead/16BitALU/16BitALU.srcs/sources_1/imports/verilog/testALU_3.v" Line 522: Result of 16-bit expression is truncated to fit in 1-bit target.
+WARNING:HDLCompiler:413 - "C:/Users/ymf_m/Documents/mojo/16BitALU/work/planAhead/16BitALU/16BitALU.srcs/sources_1/imports/verilog/testALU_3.v" Line 134: Result of 16-bit expression is truncated to fit in 6-bit target.
+WARNING:HDLCompiler:413 - "C:/Users/ymf_m/Documents/mojo/16BitALU/work/planAhead/16BitALU/16BitALU.srcs/sources_1/imports/verilog/testALU_3.v" Line 500: Result of 16-bit expression is truncated to fit in 1-bit target.
+WARNING:HDLCompiler:413 - "C:/Users/ymf_m/Documents/mojo/16BitALU/work/planAhead/16BitALU/16BitALU.srcs/sources_1/imports/verilog/testALU_3.v" Line 515: Result of 16-bit expression is truncated to fit in 1-bit target.
+WARNING:HDLCompiler:413 - "C:/Users/ymf_m/Documents/mojo/16BitALU/work/planAhead/16BitALU/16BitALU.srcs/sources_1/imports/verilog/testALU_3.v" Line 531: Result of 16-bit expression is truncated to fit in 1-bit target.
 
 =========================================================================
 *                           HDL Synthesis                               *
@@ -131,8 +131,11 @@ Synthesizing Unit <testALU_3>.
     Related source file is "C:/Users/ymf_m/Documents/mojo/16BitALU/work/planAhead/16BitALU/16BitALU.srcs/sources_1/imports/verilog/testALU_3.v".
 WARNING:Xst:647 - Input <io_button<0:0>> is never used. This port will be preserved and left unconnected if it belongs to a top-level block or it belongs to a sub-block and the hierarchy of this sub-block is preserved.
 WARNING:Xst:647 - Input <io_dip<23:19>> is never used. This port will be preserved and left unconnected if it belongs to a top-level block or it belongs to a sub-block and the hierarchy of this sub-block is preserved.
-    Found 6-bit register for signal <M_state_q>.
+    Register <M_btemp_q> equivalent to <M_atemp_q> has been removed
     Found 28-bit register for signal <M_clock_q>.
+    Found 16-bit register for signal <M_atemp_q>.
+    Found 6-bit register for signal <M_alufntemp_q>.
+    Found 6-bit register for signal <M_state_q>.
     Found finite state machine <FSM_0> for signal <M_state_q>.
     -----------------------------------------------------------------------
     | States             | 54                                             |
@@ -147,23 +150,23 @@ WARNING:Xst:647 - Input <io_dip<23:19>> is never used. This port will be preserv
     | Encoding           | auto                                           |
     | Implementation     | LUT                                            |
     -----------------------------------------------------------------------
-    Found 16-bit adder for signal <PWR_8_o_GND_8_o_add_31_OUT> created at line 188.
-    Found 16-bit adder for signal <GND_8_o_GND_8_o_add_53_OUT> created at line 220.
-    Found 16-bit adder for signal <GND_8_o_GND_8_o_add_64_OUT> created at line 236.
-    Found 16-bit adder for signal <PWR_8_o_GND_8_o_add_73_OUT> created at line 252.
-    Found 16-bit adder for signal <GND_8_o_GND_8_o_add_134_OUT> created at line 364.
-    Found 16-bit adder for signal <GND_8_o_GND_8_o_add_143_OUT> created at line 380.
-    Found 16-bit adder for signal <GND_8_o_GND_8_o_add_161_OUT> created at line 411.
-    Found 16-bit adder for signal <PWR_8_o_GND_8_o_add_179_OUT> created at line 443.
-    Found 16-bit adder for signal <GND_8_o_GND_8_o_add_188_OUT> created at line 459.
-    Found 16-bit adder for signal <PWR_8_o_GND_8_o_add_197_OUT> created at line 475.
-    Found 16-bit adder for signal <GND_8_o_GND_8_o_add_231_OUT> created at line 539.
-    Found 16-bit adder for signal <PWR_8_o_GND_8_o_add_248_OUT> created at line 571.
-    Found 28-bit adder for signal <M_clock_q[27]_GND_8_o_add_257_OUT> created at line 588.
+    Found 16-bit adder for signal <PWR_8_o_GND_8_o_add_33_OUT> created at line 197.
+    Found 16-bit adder for signal <GND_8_o_GND_8_o_add_55_OUT> created at line 229.
+    Found 16-bit adder for signal <GND_8_o_GND_8_o_add_66_OUT> created at line 245.
+    Found 16-bit adder for signal <PWR_8_o_GND_8_o_add_75_OUT> created at line 261.
+    Found 16-bit adder for signal <GND_8_o_GND_8_o_add_136_OUT> created at line 373.
+    Found 16-bit adder for signal <GND_8_o_GND_8_o_add_145_OUT> created at line 389.
+    Found 16-bit adder for signal <GND_8_o_GND_8_o_add_163_OUT> created at line 420.
+    Found 16-bit adder for signal <PWR_8_o_GND_8_o_add_181_OUT> created at line 452.
+    Found 16-bit adder for signal <GND_8_o_GND_8_o_add_190_OUT> created at line 468.
+    Found 16-bit adder for signal <PWR_8_o_GND_8_o_add_199_OUT> created at line 484.
+    Found 16-bit adder for signal <GND_8_o_GND_8_o_add_233_OUT> created at line 548.
+    Found 16-bit adder for signal <PWR_8_o_GND_8_o_add_250_OUT> created at line 580.
+    Found 28-bit adder for signal <M_clock_q[27]_GND_8_o_add_259_OUT> created at line 597.
     Summary:
 	inferred   3 Adder/Subtractor(s).
-	inferred  28 D-type flip-flop(s).
-	inferred  85 Multiplexer(s).
+	inferred  50 D-type flip-flop(s).
+	inferred  88 Multiplexer(s).
 	inferred   1 Finite State Machine(s).
 Unit <testALU_3> synthesized.
 
@@ -236,18 +239,20 @@ Macro Statistics
  18-bit adder                                          : 1
  28-bit adder                                          : 1
  5-bit adder                                           : 1
-# Registers                                            : 3
+# Registers                                            : 5
+ 16-bit register                                       : 1
  18-bit register                                       : 1
  28-bit register                                       : 1
  4-bit register                                        : 1
-# Multiplexers                                         : 97
+ 6-bit register                                        : 1
+# Multiplexers                                         : 100
  1-bit 2-to-1 multiplexer                              : 6
  1-bit 4-to-1 multiplexer                              : 1
- 16-bit 2-to-1 multiplexer                             : 31
+ 16-bit 2-to-1 multiplexer                             : 33
  16-bit 4-to-1 multiplexer                             : 4
  24-bit 2-to-1 multiplexer                             : 2
  28-bit 2-to-1 multiplexer                             : 40
- 6-bit 2-to-1 multiplexer                              : 12
+ 6-bit 2-to-1 multiplexer                              : 13
  7-bit 2-to-1 multiplexer                              : 1
 # Logic shifters                                       : 4
  16-bit shifter arithmetic right                       : 1
@@ -307,16 +312,16 @@ Macro Statistics
  28-bit adder                                          : 1
 # Counters                                             : 1
  18-bit up counter                                     : 1
-# Registers                                            : 32
- Flip-Flops                                            : 32
-# Multiplexers                                         : 97
- 1-bit 2-to-1 multiplexer                              : 6
+# Registers                                            : 54
+ Flip-Flops                                            : 54
+# Multiplexers                                         : 115
+ 1-bit 2-to-1 multiplexer                              : 22
  1-bit 4-to-1 multiplexer                              : 1
- 16-bit 2-to-1 multiplexer                             : 31
+ 16-bit 2-to-1 multiplexer                             : 32
  16-bit 4-to-1 multiplexer                             : 4
  24-bit 2-to-1 multiplexer                             : 2
  28-bit 2-to-1 multiplexer                             : 40
- 6-bit 2-to-1 multiplexer                              : 12
+ 6-bit 2-to-1 multiplexer                              : 13
  7-bit 2-to-1 multiplexer                              : 1
 # Logic shifters                                       : 4
  16-bit shifter arithmetic right                       : 1
@@ -333,6 +338,12 @@ Macro Statistics
 =========================================================================
 *                         Low Level Synthesis                           *
 =========================================================================
+INFO:Xst:2261 - The FF/Latch <M_alufntemp_q_3> in Unit <testALU_3> is equivalent to the following FF/Latch, which will be removed : <M_atemp_q_3> 
+INFO:Xst:2261 - The FF/Latch <M_alufntemp_q_4> in Unit <testALU_3> is equivalent to the following FF/Latch, which will be removed : <M_atemp_q_4> 
+INFO:Xst:2261 - The FF/Latch <M_alufntemp_q_5> in Unit <testALU_3> is equivalent to the following FF/Latch, which will be removed : <M_atemp_q_5> 
+INFO:Xst:2261 - The FF/Latch <M_alufntemp_q_1> in Unit <testALU_3> is equivalent to the following FF/Latch, which will be removed : <M_atemp_q_1> 
+INFO:Xst:2261 - The FF/Latch <M_alufntemp_q_2> in Unit <testALU_3> is equivalent to the following FF/Latch, which will be removed : <M_atemp_q_2> 
+INFO:Xst:2261 - The FF/Latch <M_alufntemp_q_0> in Unit <testALU_3> is equivalent to the following FF/Latch, which will be removed : <M_atemp_q_0> 
 Analyzing FSM <MFsm> for best encoding.
 Optimizing FSM <testALU/FSM_0> on signal <M_state_q[1:54]> with one-hot encoding.
 ------------------------------------------------------------------
@@ -407,10 +418,12 @@ WARNING:Xst:1293 - FF/Latch <testALU/M_state_q_FSM_FFd8> has a constant value of
 
 Mapping all equations...
 Building and optimizing final netlist ...
-Found area constraint ratio of 100 (+ 0) on block mojo_top_0, actual ratio is 12.
+Found area constraint ratio of 100 (+ 0) on block mojo_top_0, actual ratio is 13.
+FlipFlop testALU/M_state_q_FSM_FFd25 has been replicated 2 time(s)
 FlipFlop testALU/M_state_q_FSM_FFd3 has been replicated 2 time(s)
 FlipFlop testALU/M_state_q_FSM_FFd47 has been replicated 2 time(s)
 FlipFlop testALU/M_state_q_FSM_FFd49 has been replicated 1 time(s)
+FlipFlop testALU/M_state_q_FSM_FFd54 has been replicated 2 time(s)
 
 Final Macro Processing ...
 
@@ -422,8 +435,8 @@ Unit <mojo_top_0> processed.
 Final Register Report
 
 Macro Statistics
-# Registers                                            : 106
- Flip-Flops                                            : 106
+# Registers                                            : 126
+ Flip-Flops                                            : 126
 
 =========================================================================
 
@@ -447,7 +460,7 @@ Clock Information:
 -----------------------------------+------------------------+-------+
 Clock Signal                       | Clock buffer(FF name)  | Load  |
 -----------------------------------+------------------------+-------+
-clk                                | BUFGP                  | 106   |
+clk                                | BUFGP                  | 126   |
 -----------------------------------+------------------------+-------+
 
 Asynchronous Control Signals Information:
@@ -458,9 +471,9 @@ Timing Summary:
 ---------------
 Speed Grade: -2
 
-   Minimum period: 19.149ns (Maximum Frequency: 52.223MHz)
-   Minimum input arrival time before clock: 20.585ns
-   Maximum output required time after clock: 18.990ns
-   Maximum combinational path delay: 20.426ns
+   Minimum period: 20.139ns (Maximum Frequency: 49.654MHz)
+   Minimum input arrival time before clock: 21.787ns
+   Maximum output required time after clock: 18.989ns
+   Maximum combinational path delay: 20.636ns
 
 =========================================================================

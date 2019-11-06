@@ -99,20 +99,26 @@ module testALU_3 (
     .n(M_alu_n)
   );
   reg [27:0] M_clock_d, M_clock_q = 1'h0;
+  reg [15:0] M_atemp_d, M_atemp_q = 1'h0;
+  reg [15:0] M_btemp_d, M_btemp_q = 1'h0;
+  reg [5:0] M_alufntemp_d, M_alufntemp_q = 1'h0;
   
   localparam SPEED = 5'h19;
   
   reg [15:0] wrong;
   
-  reg [15:0] atemp;
+  reg [15:0] inputa;
   
-  reg [15:0] btemp;
+  reg [15:0] inputb;
   
-  reg [5:0] alufntemp;
+  reg [5:0] inputalufn;
   
   always @* begin
     M_state_d = M_state_q;
+    M_alufntemp_d = M_alufntemp_q;
+    M_btemp_d = M_btemp_q;
     M_clock_d = M_clock_q;
+    M_atemp_d = M_atemp_q;
     
     M_alu_a = 16'h0000;
     M_alu_b = 16'h0000;
@@ -123,9 +129,9 @@ module testALU_3 (
     M_alu_setn = 1'h0;
     M_alu_setv = 1'h0;
     M_alu_setz = 1'h0;
-    atemp = 16'bxxxxxxxxxxxxxxxx;
-    btemp = 16'bxxxxxxxxxxxxxxxx;
-    alufntemp = 16'bxxxxxxxxxxxxxxxx;
+    M_atemp_d = 16'bxxxxxxxxxxxxxxxx;
+    M_btemp_d = 16'bxxxxxxxxxxxxxxxx;
+    M_alufntemp_d = 16'bxxxxxxxxxxxxxxxx;
     sum = M_alu_aluOut;
     sevensegdisp = 24'h000000;
     wrong = 16'h0000;
@@ -139,27 +145,30 @@ module testALU_3 (
         M_clock_d = 1'h0;
         if (io_dip[16+0+0-:1] == 1'h1) begin
           sevensegdisp = 24'h2d1515;
+          inputalufn = io_dip[0+0+5-:6];
           if (io_button[2+0-:1] == 1'h1 && io_dip[16+0+0-:1] == 1'h1) begin
-            alufntemp = io_dip[0+0+5-:6];
+            M_alufntemp_d = inputalufn;
           end
         end
         if (io_dip[16+1+0-:1] == 1'h1) begin
           sevensegdisp = 24'h2cb2cb;
+          inputa[0+7-:8] = io_dip[0+7-:8];
+          inputa[8+7-:8] = io_dip[8+7-:8];
           if (io_button[2+0-:1] == 1'h1 && io_dip[16+1+0-:1] == 1'h1) begin
-            atemp[0+7-:8] = io_dip[0+7-:8];
-            atemp[8+7-:8] = io_dip[8+7-:8];
+            M_atemp_d = inputa;
           end
         end
         if (io_dip[16+2+0-:1] == 1'h1) begin
           sevensegdisp = 24'h34d34d;
+          inputb[0+7-:8] = io_dip[0+7-:8];
+          inputb[8+7-:8] = io_dip[8+7-:8];
           if (io_button[2+0-:1] == 1'h1 && io_dip[16+2+0-:1] == 1'h1) begin
-            btemp[0+7-:8] = io_dip[0+7-:8];
-            btemp[8+7-:8] = io_dip[8+7-:8];
+            M_btemp_d = inputb;
           end
         end
-        M_alu_a = atemp;
-        M_alu_b = btemp;
-        M_alu_alufn = alufntemp;
+        M_alu_a = M_atemp_q;
+        M_alu_b = M_btemp_q;
+        M_alu_alufn = M_alufntemp_q;
         sum = M_alu_aluOut;
         setv = M_alu_v;
         setn = M_alu_n;
@@ -674,9 +683,15 @@ module testALU_3 (
   always @(posedge clk) begin
     if (rst == 1'b1) begin
       M_clock_q <= 1'h0;
+      M_atemp_q <= 1'h0;
+      M_btemp_q <= 1'h0;
+      M_alufntemp_q <= 1'h0;
       M_state_q <= 1'h0;
     end else begin
       M_clock_q <= M_clock_d;
+      M_atemp_q <= M_atemp_d;
+      M_btemp_q <= M_btemp_d;
+      M_alufntemp_q <= M_alufntemp_d;
       M_state_q <= M_state_d;
     end
   end
